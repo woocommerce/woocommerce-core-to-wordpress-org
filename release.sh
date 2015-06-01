@@ -54,32 +54,6 @@ rm -Rf $GIT_PATH
 echo "Cloning GIT repo"
 git clone $GIT_REPO $GIT_PATH --branch ${BRANCH} --single-branch
 
-# MOVE INTO GIT DIR
-cd $GIT_PATH
-
-# REMOVE UNWANTED FILES & FOLDERS
-echo "Removing unwanted files"
-rm -Rf .git
-rm -Rf tests
-rm -f .gitattributes
-rm -f .gitignore
-rm -f .gitmodules
-rm -f .travis.yml
-rm -f Gruntfile.js
-rm -f package.json
-rm -f .jscrsrc
-rm -f .jshintrc
-rm -f composer.json
-rm -f phpunit.xml
-rm -f phpunit.xml.dist
-rm -f README.md
-rm -Rf apigen
-rm -f .coveralls.yml
-rm -f .editorconfig
-rm -f .scrutinizer.yml
-rm -f .travis.yml
-rm -f CONTRIBUTING.md
-
 # MOVE INTO SVN DIR
 cd $SVN_PATH
 
@@ -87,25 +61,41 @@ cd $SVN_PATH
 echo "Updating SVN"
 svn update
 
-# DELETE TRUNK
-echo "Replacing trunk"
-rm -Rf trunk/
-
 # COPY GIT DIR TO TRUNK
-cp -R $GIT_PATH trunk/
+cd $GIT_PATH
+rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
+	--exclude=.coveralls.yml \
+	--exclude=.editorconfig \
+	--exclude=.git/ \
+	--exclude=.gitattributes \
+	--exclude=.gitignore \
+	--exclude=.gitmodules \
+	--exclude=.jscrsrc \
+	--exclude=.jshintrc \
+	--exclude=.scrutinizer.yml \
+	--exclude=.travis.yml \
+	--exclude=.travis.yml \
+	--exclude=apigen/ \
+	--exclude=apigen.neon \
+	--exclude=composer.json \
+	--exclude=CONTRIBUTING.md \
+	--exclude=Gruntfile.js \
+	--exclude=package.json \
+	--exclude=phpunit.xml \
+	--exclude=phpunit.xml.dist \
+	--exclude=README.md \
+	--exclude=tests/
 
-# DO THE ADD ALL NOT KNOWN FILES UNIX COMMAND
-svn add --force * --auto-props --parents --depth infinity -q
+cd $SVN_PATH
 
 # DO THE REMOVE ALL DELETED FILES UNIX COMMAND
 svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )
 
+# DO THE ADD ALL NOT KNOWN FILES UNIX COMMAND
+svn add --force * --auto-props --parents --depth infinity -q
+
 # COPY TRUNK TO TAGS/$VERSION
 svn copy trunk tags/${VERSION}
-
-# DO SVN COMMIT
-svn status
-echo "svn commit -m \"Release "${VERSION}", see readme.txt for changelog.\""
 
 # REMOVE THE GIT DIR
 echo "Removing GIT dir"
@@ -115,6 +105,10 @@ rm -Rf $GIT_PATH
 echo "Creating GITHUB release"
 API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": false}' $VERSION $BRANCH $VERSION $VERSION)
 curl --data "$API_JSON" https://api.github.com/repos/woothemes/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
+
+# DO SVN COMMIT
+svn status
+echo "svn commit -m \"Release "${VERSION}", see readme.txt for changelog.\""
 
 # DONE, BYE
 echo "WOOCOMMERCE RELEASER DONE"
