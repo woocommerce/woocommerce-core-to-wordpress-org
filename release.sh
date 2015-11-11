@@ -75,8 +75,9 @@ rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
 	--exclude=.scrutinizer.yml \
 	--exclude=.travis.yml \
 	--exclude=.travis.yml \
-	--exclude=apigen/ \
 	--exclude=apigen.neon \
+	--exclude=apigen/ \
+	--exclude=CHANGELOG.txt \
 	--exclude=composer.json \
 	--exclude=CONTRIBUTING.md \
 	--exclude=Gruntfile.js \
