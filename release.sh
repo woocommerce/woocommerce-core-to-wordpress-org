@@ -64,20 +64,22 @@ svn update
 # COPY GIT DIR TO TRUNK
 cd $GIT_PATH
 rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
+	--exclude=.codeclimate.yml \
 	--exclude=.coveralls.yml \
 	--exclude=.editorconfig \
 	--exclude=.git/ \
 	--exclude=.gitattributes \
+	--exclude=.github \
 	--exclude=.gitignore \
 	--exclude=.gitmodules \
 	--exclude=.jscrsrc \
 	--exclude=.jshintrc \
 	--exclude=.scrutinizer.yml \
 	--exclude=.travis.yml \
-	--exclude=.travis.yml \
 	--exclude=apigen.neon \
 	--exclude=apigen/ \
 	--exclude=CHANGELOG.txt \
+	--exclude=composer.json \
 	--exclude=composer.json \
 	--exclude=CONTRIBUTING.md \
 	--exclude=Gruntfile.js \
