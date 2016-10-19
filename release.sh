@@ -107,7 +107,7 @@ rm -Rf $GIT_PATH
 # CREATE THE GITHUB RELEASE
 echo "Creating GITHUB release"
 API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": false}' $VERSION $BRANCH $VERSION $VERSION)
-curl --data "$API_JSON" https://api.github.com/repos/woothemes/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
+curl --data "$API_JSON" https://api.github.com/repos/woocommerce/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
 
 # DO SVN COMMIT
 svn status
