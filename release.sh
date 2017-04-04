@@ -37,7 +37,7 @@ PRODUCT_NAME="woocommerce"
 PRODUCT_NAME_GIT=${PRODUCT_NAME}"-git"
 PRODUCT_NAME_SVN=${PRODUCT_NAME}"-svn"
 SVN_REPO="http://plugins.svn.wordpress.org/woocommerce/"
-GIT_REPO="git@github.com:woothemes/woocommerce.git"
+GIT_REPO="git@github.com:woocommerce/woocommerce.git"
 SVN_PATH=$ROOT_PATH$PRODUCT_NAME_SVN
 GIT_PATH=$ROOT_PATH$PRODUCT_NAME_GIT
 
@@ -63,7 +63,9 @@ svn update
 
 # COPY GIT DIR TO TRUNK
 cd $GIT_PATH
+# rsync ./ $SVN_PATH/tags/${VERSION}/ --recursive --verbose --delete --delete-excluded \
 rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
+	--exclude=.babelrc \
 	--exclude=.codeclimate.yml \
 	--exclude=.coveralls.yml \
 	--exclude=.editorconfig \
@@ -76,14 +78,16 @@ rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
 	--exclude=.jshintrc \
 	--exclude=.scrutinizer.yml \
 	--exclude=.travis.yml \
+	--exclude=.wordpress-org \
 	--exclude=apigen.neon \
 	--exclude=apigen/ \
 	--exclude=CHANGELOG.txt \
 	--exclude=composer.json \
-	--exclude=composer.json \
+	--exclude=composer.lock \
 	--exclude=CONTRIBUTING.md \
 	--exclude=Gruntfile.js \
 	--exclude=package.json \
+	--exclude=phpcs.ruleset.xml \
 	--exclude=phpunit.xml \
 	--exclude=phpunit.xml.dist \
 	--exclude=README.md \
