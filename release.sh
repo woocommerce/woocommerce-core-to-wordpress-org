@@ -77,6 +77,7 @@ rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
 	--exclude=.jscrsrc \
 	--exclude=.jshintrc \
 	--exclude=.scrutinizer.yml \
+	--exclude=.stylelintrc \
 	--exclude=.travis.yml \
 	--exclude=.wordpress-org \
 	--exclude=apigen.neon \
