@@ -9,19 +9,13 @@ if [ -r $HOME/.wc-deploy ]; then
   echo "User config file read successfully!"
   . $HOME/.wc-deploy
 else
-  echo "You need create a ~/.wc-deploy file with your GITHUB_ACCESS_TOKEN and ROOT_PATH settings."
+  echo "You need create a ~/.wc-deploy file with your GITHUB_ACCESS_TOKEN settings."
   echo "Deploy aborted!"
   exit
 fi
 
 if [ -z $GITHUB_ACCESS_TOKEN ]; then
   echo "You need set the GITHUB_ACCESS_TOKEN in your ~/.wc-deploy file."
-  echo "Deploy aborted!"
-  exit
-fi
-
-if [ -z $ROOT_PATH ]; then
-  echo "You need set the ROOT_PATH in your ~/.wc-deploy file."
   echo "Deploy aborted!"
   exit
 fi
@@ -33,13 +27,19 @@ echo "-------------------------------------------"
 read -p "PRESS [ENTER] TO RELEASE VERSION ${VERSION} USING BRANCH ${BRANCH}"
 
 # VARS
+BUILD_PATH=$(pwd)"/build"
 PRODUCT_NAME="woocommerce"
 PRODUCT_NAME_GIT=${PRODUCT_NAME}"-git"
 PRODUCT_NAME_SVN=${PRODUCT_NAME}"-svn"
 SVN_REPO="http://plugins.svn.wordpress.org/woocommerce/"
 GIT_REPO="git@github.com:woocommerce/woocommerce.git"
-SVN_PATH=$ROOT_PATH$PRODUCT_NAME_SVN
-GIT_PATH=$ROOT_PATH$PRODUCT_NAME_GIT
+SVN_PATH=$BUILD_PATH$PRODUCT_NAME_SVN
+GIT_PATH=$BUILD_PATH$PRODUCT_NAME_GIT
+
+# Create build directory if does not exists
+if [ ! -d $BUILD_PATH ]; then
+  mkdir -p $BUILD_PATH
+fi
 
 # CHECKOUT SVN DIR IF NOT EXISTS
 if [ ! -d $SVN_PATH ]; then
