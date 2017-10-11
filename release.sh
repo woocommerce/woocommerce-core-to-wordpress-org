@@ -65,34 +65,22 @@ svn update
 cd $GIT_PATH
 # rsync ./ $SVN_PATH/tags/${VERSION}/ --recursive --verbose --delete --delete-excluded \
 rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
-	--exclude=.babelrc \
-	--exclude=.codeclimate.yml \
-	--exclude=.coveralls.yml \
-	--exclude=.editorconfig \
-	--exclude=.git/ \
-	--exclude=.gitattributes \
-	--exclude=.github \
-	--exclude=.gitignore \
-	--exclude=.gitmodules \
-	--exclude=.jscrsrc \
-	--exclude=.jshintrc \
-	--exclude=.scrutinizer.yml \
-	--exclude=.stylelintrc \
-	--exclude=.travis.yml \
-	--exclude=.wordpress-org \
-	--exclude=apigen.neon \
-	--exclude=apigen/ \
-	--exclude=CHANGELOG.txt \
-	--exclude=composer.json \
-	--exclude=composer.lock \
-	--exclude=CONTRIBUTING.md \
-	--exclude=Gruntfile.js \
-	--exclude=package.json \
-	--exclude=phpcs.ruleset.xml \
-	--exclude=phpunit.xml \
-	--exclude=phpunit.xml.dist \
-	--exclude=README.md \
-	--exclude=tests/
+  --exclude ".*/" \
+  --exclude="*.md" \
+  --exclude=".*" \
+  --exclude="composer.*" \
+  --exclude=/vendor/ \
+  --exclude=apigen.neon \
+  --exclude=apigen/ \
+  --exclude=CHANGELOG.txt \
+  --exclude=Gruntfile.js \
+  --exclude=node_modules/ \
+  --exclude=package.json \
+  --exclude=phpcs.ruleset.xml \
+  --exclude=phpunit.xml \
+  --exclude=phpunit.xml.dist \
+  --exclude=README.md \
+  --exclude=tests/
 
 cd $SVN_PATH
 
