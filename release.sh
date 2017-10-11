@@ -65,7 +65,7 @@ svn update
 cd $GIT_PATH
 # rsync ./ $SVN_PATH/tags/${VERSION}/ --recursive --verbose --delete --delete-excluded \
 rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
-  --exclude ".*/" \
+  --exclude=".*/" \
   --exclude="*.md" \
   --exclude=".*" \
   --exclude="composer.*" \
