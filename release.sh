@@ -33,8 +33,8 @@ PRODUCT_NAME_GIT=${PRODUCT_NAME}"-git"
 PRODUCT_NAME_SVN=${PRODUCT_NAME}"-svn"
 SVN_REPO="http://plugins.svn.wordpress.org/woocommerce/"
 GIT_REPO="git@github.com:woocommerce/woocommerce.git"
-SVN_PATH=$BUILD_PATH$PRODUCT_NAME_SVN
-GIT_PATH=$BUILD_PATH$PRODUCT_NAME_GIT
+SVN_PATH="$BUILD_PATH/$PRODUCT_NAME_SVN"
+GIT_PATH="$BUILD_PATH/$PRODUCT_NAME_GIT"
 
 # Create build directory if does not exists
 if [ ! -d $BUILD_PATH ]; then
