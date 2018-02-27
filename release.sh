@@ -69,6 +69,7 @@ rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
   --exclude="*.md" \
   --exclude=".*" \
   --exclude="composer.*" \
+  --exclude="*.lock" \
   --exclude=/vendor/ \
   --exclude=apigen.neon \
   --exclude=apigen/ \
@@ -76,7 +77,7 @@ rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
   --exclude=Gruntfile.js \
   --exclude=node_modules/ \
   --exclude=package.json \
-  --exclude=phpcs.ruleset.xml \
+  --exclude=phpcs.xml \
   --exclude=phpunit.xml \
   --exclude=phpunit.xml.dist \
   --exclude=README.md \
