@@ -77,6 +77,7 @@ rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
   --exclude=Gruntfile.js \
   --exclude=node_modules/ \
   --exclude=package.json \
+  --exclude=package-lock.json \
   --exclude=phpcs.xml \
   --exclude=phpunit.xml \
   --exclude=phpunit.xml.dist \
