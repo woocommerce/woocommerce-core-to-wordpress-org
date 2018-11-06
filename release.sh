@@ -54,6 +54,11 @@ rm -Rf $GIT_PATH
 echo "Cloning GIT repo"
 git clone $GIT_REPO $GIT_PATH --branch ${BRANCH} --single-branch
 
+# RUN GRUNT
+echo "Running JS Build
+npm install
+npm run build
+
 # MOVE INTO SVN DIR
 cd $SVN_PATH
 
