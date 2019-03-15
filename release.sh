@@ -20,15 +20,6 @@ if [ -z $GITHUB_ACCESS_TOKEN ]; then
   exit
 fi
 
-# Functions
-# Check if string contains substring
-is_substring() {
-  case "$2" in
-    *$1*) return 0;;
-    *) return 1;;
-  esac
-}
-
 # Ask info
 read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
@@ -53,6 +44,45 @@ GIT_REPO="https://github.com/woocommerce/woocommerce.git"
 SVN_PATH="$BUILD_PATH/$PRODUCT_NAME_SVN"
 GIT_PATH="$BUILD_PATH/$PRODUCT_NAME_GIT"
 IS_PRE_RELEASE="false"
+
+# Functions
+# Check if string contains substring
+is_substring() {
+  case "$2" in
+    *$1*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Sync dest files
+copy_dest_files() {
+  cd $GIT_PATH
+  rsync ./ $SVN_PATH/$1/ --recursive --verbose --delete --delete-excluded \
+    --exclude=".*/" \
+    --exclude="*.md" \
+    --exclude=".*" \
+    --exclude="composer.*" \
+    --exclude="*.lock" \
+    --exclude=/vendor/ \
+    --exclude=apigen.neon \
+    --exclude=apigen/ \
+    --exclude=CHANGELOG.txt \
+    --exclude=Gruntfile.js \
+    --exclude=node_modules/ \
+    --exclude=none \
+    --exclude=package.json \
+    --exclude=package-lock.json \
+    --exclude=phpcs.xml \
+    --exclude=phpunit.xml \
+    --exclude=phpunit.xml.dist \
+    --exclude=README.md \
+    --exclude=tests/
+  cd $SVN_PATH
+}
 
 # Check if is a pre-release.
 if is_substring "-" ${VERSION}; then
@@ -91,29 +121,7 @@ echo "Updating SVN..."
 svn update
 
 # Copy GIT directory to trunk
-cd $GIT_PATH
-rsync ./ $SVN_PATH/trunk/ --recursive --verbose --delete --delete-excluded \
-  --exclude=".*/" \
-  --exclude="*.md" \
-  --exclude=".*" \
-  --exclude="composer.*" \
-  --exclude="*.lock" \
-  --exclude=/vendor/ \
-  --exclude=apigen.neon \
-  --exclude=apigen/ \
-  --exclude=CHANGELOG.txt \
-  --exclude=Gruntfile.js \
-  --exclude=node_modules/ \
-  --exclude=none \
-  --exclude=package.json \
-  --exclude=package-lock.json \
-  --exclude=phpcs.xml \
-  --exclude=phpunit.xml \
-  --exclude=phpunit.xml.dist \
-  --exclude=README.md \
-  --exclude=tests/
-
-cd $SVN_PATH
+copy_dest_files "trunk"
 
 # Do the remove all deleted files
 svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )
@@ -122,7 +130,13 @@ svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )
 svn add --force * --auto-props --parents --depth infinity -q
 
 # Copy trunk to tag/$VERSION
-svn copy trunk tags/${VERSION}
+if [ ! -d "tags/${VERSION}" ]; then
+  svn copy trunk tags/${VERSION}
+else
+  # Just copy again the files if tag/$VERSION already exists
+  # This prevents creation of tag/$VERSION/trunk directory
+  copy_dest_files "tags/${VERSION}"
+fi
 
 # Remove the GIT directory
 echo "Removing GIT directory..."
