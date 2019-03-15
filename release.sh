@@ -75,13 +75,13 @@ rm -Rf $GIT_PATH
 
 # Clone GIT repository
 echo "Cloning GIT repository..."
-git clone $GIT_REPO $GIT_PATH --branch ${BRANCH} --single-branch
+git clone $GIT_REPO $GIT_PATH --branch ${BRANCH} --single-branch || exit "$?"
 
 # Run grunt
 echo "Running JS Build..."
 cd $GIT_PATH
 npm install
-npm run build
+npm run build || exit "$?"
 
 # Move into SVN directory
 cd $SVN_PATH
