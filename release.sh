@@ -33,15 +33,17 @@ is_substring() {
 read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
-read -r -p "You are about to release \"${VERSION}\" based in \"${BRANCH}\" GIT branch. Are you sure? [y/N] " RESPONSE
+read -r -p "You are about to release \"${VERSION}\" based in \"${BRANCH}\" GIT branch. Are you sure? [y/N]" RESPONSE
 case "$RESPONSE" in
-  [yY][eE][sS]|[yY])
+  [yY])
     echo "Accepted and moving on..."
     ;;
   *)
     exit;
     ;;
 esac
+
+exit
 
 # Variables
 BUILD_PATH=$(pwd)"/build"
