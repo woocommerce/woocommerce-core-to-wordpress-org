@@ -137,7 +137,7 @@ curl --data "$API_JSON" https://api.github.com/repos/woocommerce/${PRODUCT_NAME}
 svn status
 echo "Ready to commit into WordPress.org Plugin's Directory!"
 echo "Run the follow commads to commit:"
-echo "cd $SVN_PATH"
+echo "cd ${SVN_PATH}"
 echo "svn commit -m \"Release "${VERSION}", see readme.txt for changelog.\""
 
 # Done
