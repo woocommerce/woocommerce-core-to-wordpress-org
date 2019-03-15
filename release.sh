@@ -20,11 +20,28 @@ if [ -z $GITHUB_ACCESS_TOKEN ]; then
   exit
 fi
 
+# Functions
+# Check if string contains substring
+is_substring() {
+  case "$2" in
+    *$1*) return 0;;
+    *) return 1;;
+  esac
+}
+
 # Ask info
 read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
-read -p "PRESS [ENTER] TO RELEASE VERSION ${VERSION} USING BRANCH ${BRANCH}"
+read -r -p "You are about to release \"${VERSION}\" based in \"${BRANCH}\" GIT branch. Are you sure? [y/N] " RESPONSE
+case "$RESPONSE" in
+  [yY][eE][sS]|[yY])
+    echo "Accepted and moving on..."
+    ;;
+  *)
+    exit;
+    ;;
+esac
 
 # Variables
 BUILD_PATH=$(pwd)"/build"
@@ -36,14 +53,6 @@ GIT_REPO="https://github.com/woocommerce/woocommerce.git"
 SVN_PATH="$BUILD_PATH/$PRODUCT_NAME_SVN"
 GIT_PATH="$BUILD_PATH/$PRODUCT_NAME_GIT"
 IS_PRE_RELEASE="false"
-
-# Is substring funciton.
-is_substring() {
-  case "$2" in
-    *$1*) return 0;;
-    *) return 1;;
-  esac
-}
 
 # Check if is a pre-release.
 if is_substring "-" ${VERSION}; then
