@@ -43,8 +43,6 @@ case "$RESPONSE" in
     ;;
 esac
 
-exit
-
 # Variables
 BUILD_PATH=$(pwd)"/build"
 PRODUCT_NAME="woocommerce"
