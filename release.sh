@@ -33,7 +33,7 @@ is_substring() {
 read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
-read -r -p "You are about to release \"${VERSION}\" based in \"${BRANCH}\" GIT branch. Are you sure? [y/N]" RESPONSE
+read -r -p "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch. Are you sure? [y/N]" RESPONSE
 case "$RESPONSE" in
   [yY])
     echo "Accepted and moving on..."
