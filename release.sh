@@ -35,6 +35,20 @@ SVN_REPO="http://plugins.svn.wordpress.org/woocommerce/"
 GIT_REPO="https://github.com/woocommerce/woocommerce.git"
 SVN_PATH="$BUILD_PATH/$PRODUCT_NAME_SVN"
 GIT_PATH="$BUILD_PATH/$PRODUCT_NAME_GIT"
+IS_PRE_RELEASE="false"
+
+# Is substring funciton.
+is_substring() {
+  case "$2" in
+    *$1*) return 0;;
+    *) return 1;;
+  esac
+}
+
+# Check if is a pre-release.
+if is_substring "-" ${VERSION}; then
+  IS_PRE_RELEASE="true"
+fi
 
 # Create build directory if does not exists
 if [ ! -d $BUILD_PATH ]; then
@@ -108,7 +122,7 @@ rm -Rf $GIT_PATH
 
 # CREATE THE GITHUB RELEASE
 echo "Creating GITHUB release"
-API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": false}' $VERSION $BRANCH $VERSION $VERSION)
+API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' $VERSION $BRANCH $VERSION $VERSION $IS_PRE_RELEASE)
 curl --data "$API_JSON" https://api.github.com/repos/woocommerce/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
 
 # DO SVN COMMIT
