@@ -45,7 +45,8 @@ done
 read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
-read -r -p "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch. Are you sure? [y/N]" RESPONSE
+echo "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch."
+read -r -p "Are you sure? [y/N]" RESPONSE
 case "$RESPONSE" in
   [yY])
     echo "Confirmed! Moving on..."
