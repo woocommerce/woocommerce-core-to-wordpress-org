@@ -23,12 +23,13 @@ fi
 # Define options
 SKIP_GH=false
 SKIP_SVN=false
+SKIP_SVN_TRUNK=false
 
 # Set user options
 while [ ! $# -eq 0 ]; do
   case "$1" in
     -h|--help)
-      echo "Help Message"
+      echo "Help Message" # TODO
       exit;
       ;;
     -g|--skip-gh)
@@ -36,6 +37,9 @@ while [ ! $# -eq 0 ]; do
       ;;
     -s|--skip-svn)
       SKIP_SVN=true
+      ;;
+    -t|--svn-tag-only)
+      SKIP_SVN_TRUNK=true
       ;;
   esac
   shift
@@ -46,7 +50,7 @@ read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
 echo "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch."
-read -r -p "Are you sure? [y/N]" RESPONSE
+read -r -p "Are you sure? [y/N]: " RESPONSE
 case "$RESPONSE" in
   [yY])
     echo "Confirmed! Moving on..."
@@ -146,7 +150,11 @@ create_svn_release() {
   svn update
 
   # Copy GIT directory to trunk
-  copy_dest_files "trunk"
+  if ! $SKIP_SVN_TRUNK; then
+    copy_dest_files "trunk"
+  else
+    copy_dest_files "tags/${VERSION}"
+  fi
 
   # Do the remove all deleted files
   svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )
@@ -154,13 +162,15 @@ create_svn_release() {
   # Do the add all not know files
   svn add --force * --auto-props --parents --depth infinity -q
 
-  # Copy trunk to tag/$VERSION
-  if [ ! -d "tags/${VERSION}" ]; then
-    svn copy trunk tags/${VERSION}
-  else
-    # Just copy again the files if tag/$VERSION already exists
-    # This prevents creation of tag/$VERSION/trunk directory
-    copy_dest_files "tags/${VERSION}"
+  if ! $SKIP_SVN_TRUNK; then
+    # Copy trunk to tag/$VERSION
+    if [ ! -d "tags/${VERSION}" ]; then
+      svn copy trunk tags/${VERSION}
+    else
+      # Just copy again the files if tag/$VERSION already exists
+      # This prevents creation of tag/$VERSION/trunk directory
+      copy_dest_files "tags/${VERSION}"
+    fi
   fi
 
   # Remove the GIT directory
