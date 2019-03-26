@@ -133,20 +133,18 @@ create_svn_release() {
   # Checkout SVN repository if not exists
   if [ ! -d $SVN_PATH ]; then
     echo "No SVN directory found, fetching files..."
-    # Checkout project in non recursive way (-N or --non-recursive)
-    svn co $SVN_REPO -N $SVN_PATH
+    # Checkout project without any file
+    svn co --depth=files $SVN_REPO $SVN_PATH
 
     cd $SVN_PATH
 
     # Fetch main directories
-    svn up assets
-    svn up branches
-    svn up trunk
+    svn up assets branches trunk
 
     # Fetch tags directories without content
-    svn up --set-depth immediates tags
+    svn up --set-depth=immediates tags
     # To fetch content for a tag, use:
-    # svn up --set-depth infinity tags/<tag_number>
+    # svn up --set-depth=infinity tags/<tag_number>
   else
     # Update SVN
     cd $SVN_PATH
