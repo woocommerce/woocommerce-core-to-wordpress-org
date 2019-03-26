@@ -20,7 +20,14 @@ if [ -z $GITHUB_ACCESS_TOKEN ]; then
   exit
 fi
 
-# Define options
+# Variables
+BUILD_PATH=$(pwd)"/build"
+PRODUCT_NAME="woocommerce"
+SVN_REPO="http://plugins.svn.wordpress.org/${PRODUCT_NAME}/"
+GIT_REPO="https://github.com/woocommerce/${PRODUCT_NAME}.git"
+SVN_PATH="${BUILD_PATH}/${PRODUCT_NAME}-svn"
+GIT_PATH="${BUILD_PATH}/${PRODUCT_NAME}-git"
+IS_PRE_RELEASE="false"
 SKIP_GH=false
 SKIP_SVN=false
 SKIP_SVN_TRUNK=false
@@ -50,28 +57,15 @@ read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
 echo "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch."
-read -r -p "Are you sure? [y/N]: " RESPONSE
-case "$RESPONSE" in
-  [yY])
-    echo "Confirmed! Moving on..."
-    ;;
-  *)
-    echo "Release cancelled!"
-    exit;
-    ;;
-esac
+read -r -p "Are you sure? [y/N]: " PROCEED
 
-# Variables
-BUILD_PATH=$(pwd)"/build"
-PRODUCT_NAME="woocommerce"
-PRODUCT_NAME_GIT=${PRODUCT_NAME}"-git"
-PRODUCT_NAME_SVN=${PRODUCT_NAME}"-svn"
-SVN_REPO="http://plugins.svn.wordpress.org/woocommerce/"
-GIT_REPO="https://github.com/woocommerce/woocommerce.git"
-SVN_PATH="$BUILD_PATH/$PRODUCT_NAME_SVN"
-GIT_PATH="$BUILD_PATH/$PRODUCT_NAME_GIT"
-IS_PRE_RELEASE="false"
+if [ $(echo "$PROCEED" | tr [:upper:] [:lower:]) != "y" ]; then
+  echo "Release cancelled!"
+  exit 1
+fi
 
+echo "Confirmed! Starting process..."
+exit 1;
 # Functions
 # Check if string contains substring
 is_substring() {
@@ -126,12 +120,6 @@ create_svn_release() {
     mkdir -p $BUILD_PATH
   fi
 
-  # Checkout SVN repository if not exists
-  if [ ! -d $SVN_PATH ]; then
-    echo "No SVN directory found, will do a checkout..."
-    svn checkout $SVN_REPO $SVN_PATH
-  fi
-
   # Delete old GIT directory
   rm -Rf $GIT_PATH
 
@@ -142,12 +130,29 @@ create_svn_release() {
   # Run grunt
   run_js_build
 
-  # Move into SVN directory
-  cd $SVN_PATH
+  # Checkout SVN repository if not exists
+  if [ ! -d $SVN_PATH ]; then
+    echo "No SVN directory found, fetching files..."
+    # Checkout project in non recursive way (-N or --non-recursive)
+    svn co $SVN_REPO -N $SVN_PATH
 
-  # Update SVN
-  echo "Updating SVN..."
-  svn update
+    cd $SVN_PATH
+
+    # Fetch main directories
+    svn up assets
+    svn up branches
+    svn up trunk
+
+    # Fetch tags directories without content
+    svn up --set-depth immediates tags
+    # To fetch content for a tag, use:
+    # svn up --set-depth infinity tags/<tag_number>
+  else
+    # Update SVN
+    cd $SVN_PATH
+    echo "Updating SVN..."
+    svn up
+  fi
 
   # Copy GIT directory to trunk
   if ! $SKIP_SVN_TRUNK; then
@@ -157,15 +162,15 @@ create_svn_release() {
   fi
 
   # Do the remove all deleted files
-  svn rm $( svn status | sed -e '/^!/!d' -e 's/^!//' )
+  svn st | grep -v "^.[ \t]*\..*" | grep "^\!" | awk '{print $2"@"}' | xargs svn rm
 
   # Do the add all not know files
-  svn add --force * --auto-props --parents --depth infinity -q
+  svn st | grep -v "^.[ \t]*\..*" | grep "^?" | awk '{print $2"@"}' | xargs svn add
 
   if ! $SKIP_SVN_TRUNK; then
     # Copy trunk to tag/$VERSION
     if [ ! -d "tags/${VERSION}" ]; then
-      svn copy trunk tags/${VERSION}
+      svn cp trunk tags/${VERSION}
     else
       # Just copy again the files if tag/$VERSION already exists
       # This prevents creation of tag/$VERSION/trunk directory
@@ -180,7 +185,7 @@ create_svn_release() {
 
 # Create GH release
 create_gh_release() {
-  echo "Creating GITHUB release..."
+  echo "Creating GitHub release..."
 
   # Check if is a pre-release.
   if is_substring "-" ${VERSION}; then
@@ -206,7 +211,7 @@ if ! $SKIP_SVN; then
   echo "Ready to commit into WordPress.org Plugin's Directory!"
   echo "Run the follow commads to commit:"
   echo "cd ${SVN_PATH}"
-  echo "svn commit -m \"Release "${VERSION}", see readme.txt for changelog.\""
+  echo "svn ci -m \"Release "${VERSION}", see readme.txt for changelog.\""
 fi
 
 # Done
