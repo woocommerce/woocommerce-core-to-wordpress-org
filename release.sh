@@ -4,27 +4,12 @@ echo "-------------------------------------------"
 echo "           WOOCOMMERCE RELEASER            "
 echo "-------------------------------------------"
 
-# Test user settings
-if [ -r $HOME/.wc-deploy ]; then
-  echo "User config file read successfully!"
-  . $HOME/.wc-deploy
-else
-  echo "You need create a ~/.wc-deploy file with your GITHUB_ACCESS_TOKEN settings."
-  echo "Deploy aborted!"
-  exit
-fi
-
-if [ -z $GITHUB_ACCESS_TOKEN ]; then
-  echo "You need set the GITHUB_ACCESS_TOKEN in your ~/.wc-deploy file."
-  echo "Deploy aborted!"
-  exit
-fi
-
 # Variables
 BUILD_PATH=$(pwd)"/build"
 PRODUCT_NAME="woocommerce"
+GITHUB_ORG="woocommerce"
 SVN_REPO="http://plugins.svn.wordpress.org/${PRODUCT_NAME}/"
-GIT_REPO="https://github.com/woocommerce/${PRODUCT_NAME}.git"
+GIT_REPO="https://github.com/${GITHUB_ORG}/${PRODUCT_NAME}.git"
 SVN_PATH="${BUILD_PATH}/${PRODUCT_NAME}-svn"
 GIT_PATH="${BUILD_PATH}/${PRODUCT_NAME}-git"
 IS_PRE_RELEASE="false"
@@ -36,8 +21,7 @@ SKIP_SVN_TRUNK=false
 while [ ! $# -eq 0 ]; do
   case "$1" in
     -h|--help)
-      echo "Help Message" # TODO
-      exit;
+      exit 0
       ;;
     -g|--skip-gh)
       SKIP_GH=true
@@ -51,6 +35,22 @@ while [ ! $# -eq 0 ]; do
   esac
   shift
 done
+
+# Test user settings
+if [ -r $HOME/.wc-deploy ]; then
+  echo "User config file read successfully!"
+  . $HOME/.wc-deploy
+else
+  echo "You need create a ~/.wc-deploy file with your GITHUB_ACCESS_TOKEN settings."
+  echo "Deploy aborted!"
+  exit 1
+fi
+
+if [ -z $GITHUB_ACCESS_TOKEN ]; then
+  echo "You need set the GITHUB_ACCESS_TOKEN in your ~/.wc-deploy file."
+  echo "Deploy aborted!"
+  exit 1
+fi
 
 # Ask info
 read -p "VERSION: " VERSION
@@ -192,7 +192,7 @@ create_gh_release() {
 
   API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' $VERSION $BRANCH $VERSION $VERSION $IS_PRE_RELEASE)
 
-  curl --data "$API_JSON" https://api.github.com/repos/woocommerce/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
+  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
 }
 
 if ! $SKIP_SVN; then
