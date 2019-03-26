@@ -59,13 +59,13 @@ echo "-------------------------------------------"
 echo "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch."
 read -r -p "Are you sure? [y/N]: " PROCEED
 
-if [ $(echo "$PROCEED" | tr [:upper:] [:lower:]) != "y" ]; then
+if [ $(echo "${PROCEED:-n}" | tr [:upper:] [:lower:]) != "y" ]; then
   echo "Release cancelled!"
   exit 1
 fi
 
 echo "Confirmed! Starting process..."
-exit 1;
+
 # Functions
 # Check if string contains substring
 is_substring() {
