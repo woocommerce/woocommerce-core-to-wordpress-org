@@ -21,6 +21,14 @@ SKIP_SVN_TRUNK=false
 while [ ! $# -eq 0 ]; do
   case "$1" in
     -h|--help)
+      echo "Usage: ./release.sh [options]"
+      echo
+      echo "GitHub to WordPress.org command line client."
+      echo
+      echo "Available options:"
+      echo "  -g [--skip-gh]      Skip GitHub release/tag creation"
+      echo "  -s [--skip-svn]     Skip release on SVN"
+      echo "  -t [--svn-tag-only] Release only a SVN tag"
       exit 0
       ;;
     -g|--skip-gh)
