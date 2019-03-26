@@ -26,6 +26,7 @@ while [ ! $# -eq 0 ]; do
       echo "GitHub to WordPress.org command line client."
       echo
       echo "Available options:"
+      echo "  -h [--help]         Shows help message"
       echo "  -g [--skip-gh]      Skip GitHub release/tag creation"
       echo "  -s [--skip-svn]     Skip release on SVN"
       echo "  -t [--svn-tag-only] Release only a SVN tag"
