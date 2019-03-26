@@ -5,7 +5,8 @@ echo "           WOOCOMMERCE RELEASER            "
 echo "-------------------------------------------"
 
 # Variables
-BUILD_PATH=$(pwd)"/build"
+RELEASER_PATH=$(pwd)
+BUILD_PATH="${RELEASER_PATH}/build"
 PRODUCT_NAME="woocommerce"
 GITHUB_ORG="woocommerce"
 SVN_REPO="http://plugins.svn.wordpress.org/${PRODUCT_NAME}/"
@@ -45,18 +46,26 @@ while [ ! $# -eq 0 ]; do
   shift
 done
 
-# Test user settings
-if [ -r $HOME/.wc-deploy ]; then
-  echo "User config file read successfully!"
+# Get user settings
+if [ -r "${RELEASER_PATH}/.settings" ]; then
+  echo ".settings file read successfully!"
+  . "${RELEASER_PATH}/.settings"
+elif [ -r $HOME/.wc-deploy ]; then
+  # Legacy config file, keep for backwards compatibility
+  echo ".wc-deploy file read successfully!"
   . $HOME/.wc-deploy
 else
-  echo "You need create a ~/.wc-deploy file with your GITHUB_ACCESS_TOKEN settings."
+  echo "You need create a .settings file and fill with your GITHUB_ACCESS_TOKEN settings."
+  echo
+  echo "Use the follow command to create your .settings file:"
+  echo "cp .settings-sample .settings"
+  echo
   echo "Deploy aborted!"
   exit 1
 fi
 
 if [ -z $GITHUB_ACCESS_TOKEN ]; then
-  echo "You need set the GITHUB_ACCESS_TOKEN in your ~/.wc-deploy file."
+  echo "You need set the GITHUB_ACCESS_TOKEN in your .settings file."
   echo "Deploy aborted!"
   exit 1
 fi
