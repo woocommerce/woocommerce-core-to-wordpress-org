@@ -10,11 +10,12 @@ git clone https://github.com/woocommerce/woocommerce-core-to-wordpress-org.git
 
 ## Setup
 
-Create a `.settings` file, and fill `GITHUB_ACCESS_TOKEN`.
+Create a `.settings` file in this project's root directory, and fill `GITHUB_ACCESS_TOKEN`.
 
 You can base on [`.settings-sample`](https://github.com/woocommerce/woocommerce-core-to-wordpress-org/blob/master/.settings-sample).
 
 ```bash
+cd woocommerce-core-to-wordpress-org
 cp .settings-sample .settings
 ```
 
