@@ -27,6 +27,12 @@ while [ ! $# -eq 0 ]; do
       echo
       echo "GitHub to WordPress.org command line client."
       echo
+      echo "Examples:"
+      echo "./release.sh       # Regular release on GitHub and wp.org"
+      echo "./release.sh -t -u # Release a \"Stable tag\", and update trunk/readme.txt"
+      echo "./release.sh -s    # Release only on GitHub"
+      echo "./release.sh -g    # Release only on wp.org"
+      echo
       echo "Available options:"
       echo "  -h [--help]              Shows help message"
       echo "  -g [--skip-gh]           Skip GitHub release/tag creation"
