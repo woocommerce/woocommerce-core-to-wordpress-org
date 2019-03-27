@@ -17,6 +17,7 @@ IS_PRE_RELEASE="false"
 SKIP_GH=false
 SKIP_SVN=false
 SKIP_SVN_TRUNK=false
+UPDATE_STABLE_TAG=false
 
 # Set user options
 while [ ! $# -eq 0 ]; do
@@ -27,10 +28,11 @@ while [ ! $# -eq 0 ]; do
       echo "GitHub to WordPress.org command line client."
       echo
       echo "Available options:"
-      echo "  -h [--help]         Shows help message"
-      echo "  -g [--skip-gh]      Skip GitHub release/tag creation"
-      echo "  -s [--skip-svn]     Skip release on SVN"
-      echo "  -t [--svn-tag-only] Release only a SVN tag"
+      echo "  -h [--help]              Shows help message"
+      echo "  -g [--skip-gh]           Skip GitHub release/tag creation"
+      echo "  -s [--skip-svn]          Skip release on SVN"
+      echo "  -t [--svn-tag-only]      Release only a SVN tag"
+      echo "  -u [--svn-up-stable-tag] Update \"Stable tag\" in trunk/readme.txt"
       exit 0
       ;;
     -g|--skip-gh)
@@ -41,6 +43,9 @@ while [ ! $# -eq 0 ]; do
       ;;
     -t|--svn-tag-only)
       SKIP_SVN_TRUNK=true
+      ;;
+    -u|--svn-up-stable-tag)
+      UPDATE_STABLE_TAG=true
       ;;
   esac
   shift
@@ -175,6 +180,12 @@ create_svn_release() {
     copy_dest_files "trunk"
   else
     copy_dest_files "tags/${VERSION}"
+
+    # Update stable tag on trunk/readme.txt
+    if $UPDATE_STABLE_TAG; then
+      echo "Updating \"Stable tag\" to ${VERSION} on trunk/readme.txt..."
+      sed -i "6s/.*/Stable tag: ${VERSION}/" trunk/readme.txt
+    fi
   fi
 
   # Do the remove all deleted files
