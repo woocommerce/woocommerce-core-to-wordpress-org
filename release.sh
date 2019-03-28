@@ -39,6 +39,7 @@ while [ ! $# -eq 0 ]; do
       echo "  -s [--skip-svn]          Skip release on SVN"
       echo "  -t [--svn-tag-only]      Release only a SVN tag"
       echo "  -u [--svn-up-stable-tag] Update \"Stable tag\" in trunk/readme.txt"
+      echo "  -c [--clean]             Clean build directory"
       exit 0
       ;;
     -g|--skip-gh)
@@ -52,6 +53,10 @@ while [ ! $# -eq 0 ]; do
       ;;
     -u|--svn-up-stable-tag)
       UPDATE_STABLE_TAG=true
+      ;;
+    -c|--clean)
+      rm -rf $BUILD_PATH
+      echo "Build directory cleaned!"
       ;;
   esac
   shift
@@ -82,6 +87,7 @@ if [ -z $GITHUB_ACCESS_TOKEN ]; then
 fi
 
 # Ask info
+echo "Starting release..."
 read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
@@ -150,7 +156,7 @@ create_svn_release() {
   fi
 
   # Delete old GIT directory
-  rm -Rf $GIT_PATH
+  rm -rf $GIT_PATH
 
   # Clone GIT repository
   echo "Cloning GIT repository..."
@@ -213,7 +219,7 @@ create_svn_release() {
 
   # Remove the GIT directory
   echo "Removing GIT directory..."
-  rm -Rf $GIT_PATH
+  rm -rf $GIT_PATH
 }
 
 # Create GH release
