@@ -1,8 +1,5 @@
 #!/bin/sh
-
-echo "-------------------------------------------"
-echo "           WOOCOMMERCE RELEASER            "
-echo "-------------------------------------------"
+# WooCommerce releaser script
 
 # Variables
 RELEASER_PATH=$(pwd)
@@ -18,6 +15,64 @@ SKIP_GH=false
 SKIP_SVN=false
 SKIP_SVN_TRUNK=false
 UPDATE_STABLE_TAG=false
+
+# Functions
+# Check if string contains substring
+is_substring() {
+  case "$2" in
+    *$1*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+# Echo colorized strings
+#
+# Color codes:
+# 0 - black
+# 1 - red
+# 2 - green
+# 3 - yellow
+# 4 - blue
+# 5 - magenta
+# 6 - cian
+# 7 - white
+echo_colorized() {
+  echo "$(tput setaf $1)$2$(tput sgr0)"
+}
+
+# Sync dest files
+copy_dest_files() {
+  cd $2
+  rsync ./ $3/$1/ --recursive --verbose --delete --delete-excluded \
+    --exclude=".*/" \
+    --exclude="*.md" \
+    --exclude=".*" \
+    --exclude="composer.*" \
+    --exclude="*.lock" \
+    --exclude=/vendor/ \
+    --exclude=apigen.neon \
+    --exclude=apigen/ \
+    --exclude=CHANGELOG.txt \
+    --exclude=Gruntfile.js \
+    --exclude=node_modules/ \
+    --exclude=none \
+    --exclude=package.json \
+    --exclude=package-lock.json \
+    --exclude=phpcs.xml \
+    --exclude=phpunit.xml \
+    --exclude=phpunit.xml.dist \
+    --exclude=README.md \
+    --exclude=tests/
+  cd $3
+}
+
+echo_colorized 5 "-------------------------------------------"
+echo_colorized 5 "           WOOCOMMERCE RELEASER            "
+echo_colorized 5 "-------------------------------------------"
 
 # Set user options
 while [ ! $# -eq 0 ]; do
@@ -56,7 +111,7 @@ while [ ! $# -eq 0 ]; do
       ;;
     -c|--clean)
       rm -rf $BUILD_PATH
-      echo "Build directory cleaned!"
+      echo_colorized 2 "Build directory cleaned!"
       ;;
   esac
   shift
@@ -71,23 +126,23 @@ elif [ -r $HOME/.wc-deploy ]; then
   echo ".wc-deploy file read successfully!"
   . $HOME/.wc-deploy
 else
-  echo "You need create a .settings file and fill with your GITHUB_ACCESS_TOKEN settings."
+  echo_colorized 1 "You need create a .settings file and fill with your GITHUB_ACCESS_TOKEN settings."
   echo
-  echo "Use the follow command to create your .settings file:"
-  echo "cp .settings-sample .settings"
+  echo_colorized 1 "Use the follow command to create your .settings file:"
+  echo_colorized 1 "cp .settings-sample .settings"
   echo
-  echo "Deploy aborted!"
+  echo_colorized 1 "Deploy aborted!"
   exit 1
 fi
 
 if [ -z $GITHUB_ACCESS_TOKEN ]; then
-  echo "You need set the GITHUB_ACCESS_TOKEN in your .settings file."
-  echo "Deploy aborted!"
+  echo_colorized 1 "You need set the GITHUB_ACCESS_TOKEN in your .settings file."
+  echo_colorized 1 "Deploy aborted!"
   exit 1
 fi
 
 # Ask info
-echo "Starting release..."
+echo_colorized 2 "Starting release..."
 read -p "VERSION: " VERSION
 read -p "BRANCH: " BRANCH
 echo "-------------------------------------------"
@@ -95,61 +150,14 @@ echo "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch.
 read -r -p "Are you sure? [y/N]: " PROCEED
 
 if [ $(echo "${PROCEED:-n}" | tr [:upper:] [:lower:]) != "y" ]; then
-  echo "Release cancelled!"
+  echo_colorized 1 "Release cancelled!"
   exit 1
 fi
 
-echo "Confirmed! Starting process..."
-
-# Functions
-# Check if string contains substring
-is_substring() {
-  case "$2" in
-    *$1*)
-      return 0
-      ;;
-    *)
-      return 1
-      ;;
-  esac
-}
-
-# Sync dest files
-copy_dest_files() {
-  cd $GIT_PATH
-  rsync ./ $SVN_PATH/$1/ --recursive --verbose --delete --delete-excluded \
-    --exclude=".*/" \
-    --exclude="*.md" \
-    --exclude=".*" \
-    --exclude="composer.*" \
-    --exclude="*.lock" \
-    --exclude=/vendor/ \
-    --exclude=apigen.neon \
-    --exclude=apigen/ \
-    --exclude=CHANGELOG.txt \
-    --exclude=Gruntfile.js \
-    --exclude=node_modules/ \
-    --exclude=none \
-    --exclude=package.json \
-    --exclude=package-lock.json \
-    --exclude=phpcs.xml \
-    --exclude=phpunit.xml \
-    --exclude=phpunit.xml.dist \
-    --exclude=README.md \
-    --exclude=tests/
-  cd $SVN_PATH
-}
-
-# Run JS build.
-run_js_build() {
-  echo "Running JS Build..."
-  cd $GIT_PATH
-  npm install
-  npm run build || exit "$?"
-}
+echo_colorized 2 "Confirmed! Starting process..."
 
 # Create SVN release
-create_svn_release() {
+if ! $SKIP_SVN; then
   # Create build directory if does not exists
   if [ ! -d $BUILD_PATH ]; then
     mkdir -p $BUILD_PATH
@@ -159,15 +167,18 @@ create_svn_release() {
   rm -rf $GIT_PATH
 
   # Clone GIT repository
-  echo "Cloning GIT repository..."
+  echo_colorized 2 "Cloning GIT repository..."
   git clone $GIT_REPO $GIT_PATH --branch ${BRANCH} --single-branch || exit "$?"
 
   # Run grunt
-  run_js_build
+  echo_colorized 2 "Running JS Build..."
+  cd $GIT_PATH
+  npm install
+  npm run build || exit "$?"
 
   # Checkout SVN repository if not exists
   if [ ! -d $SVN_PATH ]; then
-    echo "No SVN directory found, fetching files..."
+    echo_colorized 2 "No SVN directory found, fetching files..."
     # Checkout project without any file
     svn co --depth=files $SVN_REPO $SVN_PATH
 
@@ -183,19 +194,19 @@ create_svn_release() {
   else
     # Update SVN
     cd $SVN_PATH
-    echo "Updating SVN..."
+    echo_colorized 2 "Updating SVN..."
     svn up
   fi
 
   # Copy GIT directory to trunk
   if ! $SKIP_SVN_TRUNK; then
-    copy_dest_files "trunk"
+    copy_dest_files "trunk" $GIT_PATH $SVN_PATH
   else
-    copy_dest_files "tags/${VERSION}"
+    copy_dest_files "tags/${VERSION}" $GIT_PATH $SVN_PATH
 
     # Update stable tag on trunk/readme.txt
     if $UPDATE_STABLE_TAG; then
-      echo "Updating \"Stable tag\" to ${VERSION} on trunk/readme.txt..."
+      echo_colorized 2 "Updating \"Stable tag\" to ${VERSION} on trunk/readme.txt..."
       sed -i "6s/.*/Stable tag: ${VERSION}/" trunk/readme.txt
     fi
   fi
@@ -213,18 +224,18 @@ create_svn_release() {
     else
       # Just copy again the files if tag/$VERSION already exists
       # This prevents creation of tag/$VERSION/trunk directory
-      copy_dest_files "tags/${VERSION}"
+      copy_dest_files "tags/${VERSION}" $GIT_PATH $SVN_PATH
     fi
   fi
 
   # Remove the GIT directory
-  echo "Removing GIT directory..."
+  echo_colorized 2 "Removing GIT directory..."
   rm -rf $GIT_PATH
-}
+fi
 
-# Create GH release
-create_gh_release() {
-  echo "Creating GitHub release..."
+# Create the GitHub release
+if ! $SKIP_GH; then
+  echo_colorized 2 "Creating GitHub release..."
 
   # Check if is a pre-release.
   if is_substring "-" ${VERSION}; then
@@ -234,24 +245,15 @@ create_gh_release() {
   API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' $VERSION $BRANCH $VERSION $VERSION $IS_PRE_RELEASE)
 
   curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
-}
-
-if ! $SKIP_SVN; then
-  create_svn_release
-fi
-
-# Create the GitHub release
-if ! $SKIP_GH; then
-  create_gh_release
 fi
 
 if ! $SKIP_SVN; then
   # SVN commit messsage
-  echo "Ready to commit into WordPress.org Plugin's Directory!"
+  echo_colorized 2 "Ready to commit into WordPress.org Plugin's Directory!"
   echo "Run the follow commads to commit:"
   echo "cd ${SVN_PATH}"
   echo "svn ci -m \"Release "${VERSION}", see readme.txt for changelog.\""
 fi
 
 # Done
-echo "Release complete!"
+echo_colorized 2 "Release complete!"
