@@ -30,6 +30,7 @@ For more details about GitHub acess tokens, check ["Creating a personal access t
 | `-s` or `--skip-svn`          | Skip release on SVN                     |
 | `-t` or `--svn-tag-only`      | Release only a SVN tag                  |
 | `-u` or `--svn-up-stable-tag` | Update "Stable tag" in trunk/readme.txt |
+| `-c` or `--clean`             | Clean build directory                   |
 
 ## Examples
 
