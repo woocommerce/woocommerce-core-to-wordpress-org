@@ -2,6 +2,7 @@
 # WooCommerce releaser script
 
 # Variables
+RELEASER_VERSION="1.0.0"
 RELEASER_PATH=$(pwd)
 BUILD_PATH="${RELEASER_PATH}/build"
 PRODUCT_NAME="woocommerce"
@@ -90,11 +91,16 @@ while [ ! $# -eq 0 ]; do
       echo
       echo "Available options:"
       echo "  -h [--help]              Shows help message"
+      echo "  -v [--version]           Shows releaser version"
       echo "  -g [--skip-gh]           Skip GitHub release/tag creation"
       echo "  -s [--skip-svn]          Skip release on SVN"
       echo "  -t [--svn-tag-only]      Release only a SVN tag"
       echo "  -u [--svn-up-stable-tag] Update \"Stable tag\" in trunk/readme.txt"
       echo "  -c [--clean]             Clean build directory"
+      exit 0
+      ;;
+    -v|--version)
+      echo "Version ${RELEASER_VERSION}"
       exit 0
       ;;
     -g|--skip-gh)

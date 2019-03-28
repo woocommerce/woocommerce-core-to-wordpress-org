@@ -26,6 +26,7 @@ For more details about GitHub acess tokens, check ["Creating a personal access t
 | Options                       | Description                             |
 |-------------------------------|-----------------------------------------|
 | `-h` or `--help`              | Shows help message                      |
+| `-v` or `--version`           | Shows releaser version                  |
 | `-g` or `--skip-gh`           | Skip GitHub release/tag creation        |
 | `-s` or `--skip-svn`          | Skip release on SVN                     |
 | `-t` or `--svn-tag-only`      | Release only a SVN tag                  |
@@ -47,3 +48,7 @@ For more details about GitHub acess tokens, check ["Creating a personal access t
 ```
 
 Note: Used while in `beta` or `RC`, e.g: latest release on wp.org repository is `3.6.0-beta.1`, but you need to `3.5.10`. Running this command will only create a new tag on the repository and update the "Stable tag" in `trunk/readme.txt`
+
+## Changelog
+
+[See changelog for details](https://github.com/woocommerce/woocommerce-core-to-wordpress-org/blob/master/CHANGELOG.md)
