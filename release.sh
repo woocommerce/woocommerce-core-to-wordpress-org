@@ -11,7 +11,7 @@ SVN_REPO="http://plugins.svn.wordpress.org/${PRODUCT_NAME}/"
 GIT_REPO="https://github.com/${GITHUB_ORG}/${PRODUCT_NAME}.git"
 SVN_PATH="${BUILD_PATH}/${PRODUCT_NAME}-svn"
 GIT_PATH="${BUILD_PATH}/${PRODUCT_NAME}-git"
-IS_PRE_RELEASE="false"
+IS_PRE_RELEASE=false
 SKIP_GH=false
 SKIP_SVN=false
 SKIP_SVN_TRUNK=false
@@ -42,14 +42,14 @@ is_substring() {
 # 6 - cian
 # 7 - white
 echo_colorized() {
-  echo "$(tput setaf $1)$2$(tput sgr0)"
+  echo "$(tput setaf "$1")$2$(tput sgr0)"
 }
 
 # Sync dest files
 copy_dest_files() {
-  cd $2
+  cd "$2" || exit
   echo "Copying progress:"
-  rsync ./ $3/$1/ --info=progress2 --info=name0 --recursive --delete --delete-excluded \
+  rsync ./ "$3"/"$1"/ --info=progress2 --info=name0 --recursive --delete --delete-excluded \
     --exclude=".*/" \
     --exclude="*.md" \
     --exclude=".*" \
@@ -69,8 +69,8 @@ copy_dest_files() {
     --exclude=phpunit.xml.dist \
     --exclude=README.md \
     --exclude=tests/
-  echo "Done copying files!"
-  cd $3
+  echo_colorized 2 "Done copying files!"
+  cd "$3" || exit
 }
 
 echo_colorized 5 "-------------------------------------------"
@@ -118,7 +118,7 @@ while [ ! $# -eq 0 ]; do
       UPDATE_STABLE_TAG=true
       ;;
     -c|--clean)
-      rm -rf $BUILD_PATH
+      rm -rf "$BUILD_PATH"
       echo_colorized 2 "Build directory cleaned!"
       ;;
   esac
@@ -128,11 +128,13 @@ done
 # Get user settings
 if [ -r "${RELEASER_PATH}/.settings" ]; then
   echo ".settings file read successfully!"
+  # shellcheck source=/dev/null
   . "${RELEASER_PATH}/.settings"
-elif [ -r $HOME/.wc-deploy ]; then
+elif [ -r "$HOME"/.wc-deploy ]; then
   # Legacy config file, keep for backwards compatibility
   echo ".wc-deploy file read successfully!"
-  . $HOME/.wc-deploy
+  # shellcheck source=/dev/null
+  . "$HOME"/.wc-deploy
 else
   echo_colorized 1 "You need create a .settings file and fill with your GITHUB_ACCESS_TOKEN settings."
   echo
@@ -143,7 +145,7 @@ else
   exit 1
 fi
 
-if [ -z $GITHUB_ACCESS_TOKEN ]; then
+if [ -z "$GITHUB_ACCESS_TOKEN" ]; then
   echo_colorized 1 "You need set the GITHUB_ACCESS_TOKEN in your .settings file."
   echo_colorized 1 "Deploy aborted!"
   exit 1
@@ -151,13 +153,16 @@ fi
 
 # Ask info
 echo_colorized 2 "Starting release..."
-read -p "VERSION: " VERSION
-read -p "BRANCH: " BRANCH
+printf "VERSION: "
+read -r VERSION
+printf "BRANCH: "
+read -r BRANCH
 echo "-------------------------------------------"
 echo "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch."
-read -r -p "Are you sure? [y/N]: " PROCEED
+printf "Are you sure? [y/N]: "
+read -r PROCEED
 
-if [ $(echo "${PROCEED:-n}" | tr [:upper:] [:lower:]) != "y" ]; then
+if [ "$(echo "${PROCEED:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
   echo_colorized 1 "Release cancelled!"
   exit 1
 fi
@@ -167,30 +172,30 @@ echo_colorized 2 "Confirmed! Starting process..."
 # Create SVN release
 if ! $SKIP_SVN; then
   # Create build directory if does not exists
-  if [ ! -d $BUILD_PATH ]; then
-    mkdir -p $BUILD_PATH
+  if [ ! -d "$BUILD_PATH" ]; then
+    mkdir -p "$BUILD_PATH"
   fi
 
   # Delete old GIT directory
-  rm -rf $GIT_PATH
+  rm -rf "$GIT_PATH"
 
   # Clone GIT repository
   echo_colorized 2 "Cloning GIT repository..."
-  git clone $GIT_REPO $GIT_PATH --branch ${BRANCH} --single-branch || exit "$?"
+  git clone $GIT_REPO "$GIT_PATH" --branch "$BRANCH" --single-branch || exit "$?"
 
   # Run grunt
   echo_colorized 2 "Running JS Build..."
-  cd $GIT_PATH
+  cd "$GIT_PATH" || exit
   npm install
   npm run build || exit "$?"
 
   # Checkout SVN repository if not exists
-  if [ ! -d $SVN_PATH ]; then
+  if [ ! -d "$SVN_PATH" ]; then
     echo_colorized 2 "No SVN directory found, fetching files..."
     # Checkout project without any file
-    svn co --depth=files $SVN_REPO $SVN_PATH
+    svn co --depth=files $SVN_REPO "$SVN_PATH"
 
-    cd $SVN_PATH
+    cd "$SVN_PATH" || exit
 
     # Fetch main directories
     svn up assets branches trunk
@@ -201,7 +206,7 @@ if ! $SKIP_SVN; then
     # svn up --set-depth=infinity tags/<tag_number>
   else
     # Update SVN
-    cd $SVN_PATH
+    cd "$SVN_PATH" || exit
     echo_colorized 2 "Updating SVN..."
     svn up
   fi
@@ -209,10 +214,10 @@ if ! $SKIP_SVN; then
   # Copy GIT directory to trunk
   if ! $SKIP_SVN_TRUNK; then
     echo_colorized 2 "Copying project files to SVN trunk..."
-    copy_dest_files "trunk" $GIT_PATH $SVN_PATH
+    copy_dest_files "trunk" "$GIT_PATH" "$SVN_PATH"
   else
     echo_colorized 2 "Copying project files to SVN tags/${VERSION}..."
-    copy_dest_files "tags/${VERSION}" $GIT_PATH $SVN_PATH
+    copy_dest_files "tags/${VERSION}" "$GIT_PATH" "$SVN_PATH"
 
     # Update stable tag on trunk/readme.txt
     if $UPDATE_STABLE_TAG; then
@@ -222,7 +227,7 @@ if ! $SKIP_SVN; then
   fi
 
   # Do the remove all deleted files
-  svn st | grep -v "^.[ \t]*\..*" | grep "^\!" | awk '{print $2"@"}' | xargs svn rm
+  svn st | grep -v "^.[ \t]*\..*" | grep "^\!" | awk '{print $2"@"}' | xargs svn rm || true
 
   # Do the add all not know files
   svn st | grep -v "^.[ \t]*\..*" | grep "^?" | awk '{print $2"@"}' | xargs svn add
@@ -230,12 +235,12 @@ if ! $SKIP_SVN; then
   # Copy trunk to tag/$VERSION
   if ! $SKIP_SVN_TRUNK && [ ! -d "tags/${VERSION}" ]; then
     echo_colorized 2 "Creating SVN tags/${VERSION}..."
-    svn cp trunk tags/${VERSION}
+    svn cp trunk tags/"${VERSION}"
   fi
 
   # Remove the GIT directory
   echo_colorized 2 "Removing GIT directory..."
-  rm -rf $GIT_PATH
+  rm -rf "$GIT_PATH"
 fi
 
 # Create the GitHub release
@@ -243,13 +248,13 @@ if ! $SKIP_GH; then
   echo_colorized 2 "Creating GitHub release..."
 
   # Check if is a pre-release.
-  if is_substring "-" ${VERSION}; then
-    IS_PRE_RELEASE="true"
+  if is_substring "-" "${VERSION}"; then
+    IS_PRE_RELEASE=true
   fi
 
-  API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' $VERSION $BRANCH $VERSION $VERSION $IS_PRE_RELEASE)
+  API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' "$VERSION" "$BRANCH" "$VERSION" "$VERSION" "$IS_PRE_RELEASE")
 
-  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PRODUCT_NAME}/releases?access_token=${GITHUB_ACCESS_TOKEN}
+  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PRODUCT_NAME}/releases?access_token="${GITHUB_ACCESS_TOKEN}"
 fi
 
 if ! $SKIP_SVN; then
@@ -257,7 +262,7 @@ if ! $SKIP_SVN; then
   echo_colorized 2 "Ready to commit into WordPress.org Plugin's Directory!"
   echo "Run the follow commads to commit:"
   echo "cd ${SVN_PATH}"
-  echo "svn ci -m \"Release "${VERSION}", see readme.txt for changelog.\""
+  echo "svn ci -m \"Release ${VERSION}, see readme.txt for changelog.\""
 fi
 
 # Done
