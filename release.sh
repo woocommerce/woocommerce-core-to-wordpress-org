@@ -48,7 +48,8 @@ echo_colorized() {
 # Sync dest files
 copy_dest_files() {
   cd $2
-  rsync ./ $3/$1/ --recursive --verbose --delete --delete-excluded \
+  echo "Copying progress:"
+  rsync ./ $3/$1/ --info=progress2 --info=name0 --recursive --delete --delete-excluded \
     --exclude=".*/" \
     --exclude="*.md" \
     --exclude=".*" \
@@ -68,6 +69,7 @@ copy_dest_files() {
     --exclude=phpunit.xml.dist \
     --exclude=README.md \
     --exclude=tests/
+  echo "Done copying files!"
   cd $3
 }
 
