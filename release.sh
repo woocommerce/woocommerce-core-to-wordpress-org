@@ -227,7 +227,7 @@ if ! $SKIP_SVN; then
   fi
 
   # Do the remove all deleted files
-  svn st | grep -v "^.[ \t]*\..*" | grep "^\!" | awk '{print $2"@"}' | xargs svn rm || true
+  svn st | grep -v "^.[ \t]*\..*" | grep "^\!" | awk '{print $2"@"}' | xargs svn rm
 
   # Do the add all not know files
   svn st | grep -v "^.[ \t]*\..*" | grep "^?" | awk '{print $2"@"}' | xargs svn add
