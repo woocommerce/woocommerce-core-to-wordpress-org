@@ -206,8 +206,10 @@ if ! $SKIP_SVN; then
 
   # Copy GIT directory to trunk
   if ! $SKIP_SVN_TRUNK; then
+    echo_colorized 2 "Copying project files to SVN trunk..."
     copy_dest_files "trunk" $GIT_PATH $SVN_PATH
   else
+    echo_colorized 2 "Copying project files to SVN tags/${VERSION}..."
     copy_dest_files "tags/${VERSION}" $GIT_PATH $SVN_PATH
 
     # Update stable tag on trunk/readme.txt
@@ -223,15 +225,10 @@ if ! $SKIP_SVN; then
   # Do the add all not know files
   svn st | grep -v "^.[ \t]*\..*" | grep "^?" | awk '{print $2"@"}' | xargs svn add
 
-  if ! $SKIP_SVN_TRUNK; then
-    # Copy trunk to tag/$VERSION
-    if [ ! -d "tags/${VERSION}" ]; then
-      svn cp trunk tags/${VERSION}
-    else
-      # Just copy again the files if tag/$VERSION already exists
-      # This prevents creation of tag/$VERSION/trunk directory
-      copy_dest_files "tags/${VERSION}" $GIT_PATH $SVN_PATH
-    fi
+  # Copy trunk to tag/$VERSION
+  if ! $SKIP_SVN_TRUNK && [ ! -d "tags/${VERSION}" ]; then
+    echo_colorized 2 "Creating SVN tags/${VERSION}..."
+    svn cp trunk tags/${VERSION}
   fi
 
   # Remove the GIT directory
