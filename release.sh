@@ -26,7 +26,7 @@ is_substring() {
   esac
 }
 
-# Echo colorized strings
+# Output colorized strings
 #
 # Color codes:
 # 0 - black
@@ -37,8 +37,13 @@ is_substring() {
 # 5 - magenta
 # 6 - cian
 # 7 - white
-echo_colorized() {
+output() {
   echo "$(tput setaf "$1")$2$(tput sgr0)"
+}
+
+# Output colorized list
+output_list() {
+  echo "$(tput setaf "$1") • $2:$(tput sgr0) \"$3\""
 }
 
 # Sync dest files
@@ -65,13 +70,13 @@ copy_dest_files() {
     --exclude=phpunit.xml.dist \
     --exclude=README.md \
     --exclude=tests/
-  echo_colorized 2 "Done copying files!"
+  output 2 "Done copying files!"
   cd "$3" || exit
 }
 
-echo_colorized 5 "-------------------------------------------"
-echo_colorized 5 "        WOOCOMMERCE PLUGIN RELEASER        "
-echo_colorized 5 "-------------------------------------------"
+output 5 "-------------------------------------------"
+output 5 "        WOOCOMMERCE PLUGIN RELEASER        "
+output 5 "-------------------------------------------"
 
 # Set user options
 while [ ! $# -eq 0 ]; do
@@ -115,7 +120,7 @@ while [ ! $# -eq 0 ]; do
       ;;
     -c|--clean)
       rm -rf "$BUILD_PATH"
-      echo_colorized 2 "Build directory cleaned!"
+      output 2 "Build directory cleaned!"
       ;;
     -p|--plugin-name)
       shift
@@ -140,18 +145,18 @@ elif [ -r "$HOME"/.wc-deploy ]; then
   # shellcheck source=/dev/null
   . "$HOME"/.wc-deploy
 else
-  echo_colorized 1 "You need create a .settings file and fill with your GITHUB_ACCESS_TOKEN settings."
+  output 1 "You need create a .settings file and fill with your GITHUB_ACCESS_TOKEN settings."
   echo
-  echo_colorized 1 "Use the follow command to create your .settings file:"
-  echo_colorized 1 "cp .settings-sample .settings"
+  output 1 "Use the follow command to create your .settings file:"
+  output 1 "cp .settings-sample .settings"
   echo
-  echo_colorized 1 "Deploy aborted!"
+  output 1 "Deploy aborted!"
   exit 1
 fi
 
 if [ -z "$GITHUB_ACCESS_TOKEN" ]; then
-  echo_colorized 1 "You need set the GITHUB_ACCESS_TOKEN in your .settings file."
-  echo_colorized 1 "Deploy aborted!"
+  output 1 "You need set the GITHUB_ACCESS_TOKEN in your .settings file."
+  output 1 "Deploy aborted!"
   exit 1
 fi
 
@@ -162,7 +167,7 @@ SVN_PATH="${BUILD_PATH}/${PLUGIN_SLUG}-svn"
 GIT_PATH="${BUILD_PATH}/${PLUGIN_SLUG}-git"
 
 # Ask info
-echo_colorized 2 "Starting release..."
+output 2 "Starting release..."
 echo
 printf "VERSION: "
 read -r VERSION
@@ -173,22 +178,22 @@ echo "-------------------------------------------"
 echo
 echo "Review all data before proceed:"
 echo
-echo " • Plugin slug: \"${PLUGIN_SLUG}\""
-echo " • Version to release: \"${VERSION}\""
-echo " • GIT branch to release: \"${BRANCH}\""
-echo " • GIT repository: \"${GIT_REPO}\""
-echo " • wp.org repository: \"${SVN_REPO}\""
+output_list 3 "Plugin slug" "${PLUGIN_SLUG}"
+output_list 3 "Version to release" "${VERSION}"
+output_list 3 "GIT branch to release" "${BRANCH}"
+output_list 3 "GIT repository" "${GIT_REPO}"
+output_list 3 "wp.org repository" "${SVN_REPO}"
 echo
 printf "Are you sure? [y/N]: "
 read -r PROCEED
 echo
 
 if [ "$(echo "${PROCEED:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
-  echo_colorized 1 "Release cancelled!"
+  output 1 "Release cancelled!"
   exit 1
 fi
 
-echo_colorized 2 "Confirmed! Starting process..."
+output 2 "Confirmed! Starting process..."
 
 # Create SVN release
 if ! $SKIP_SVN; then
@@ -201,18 +206,18 @@ if ! $SKIP_SVN; then
   rm -rf "$GIT_PATH"
 
   # Clone GIT repository
-  echo_colorized 2 "Cloning GIT repository..."
+  output 2 "Cloning GIT repository..."
   git clone "$GIT_REPO" "$GIT_PATH" --branch "$BRANCH" --single-branch || exit "$?"
 
   # Run grunt
-  echo_colorized 2 "Running JS Build..."
+  output 2 "Running JS Build..."
   cd "$GIT_PATH" || exit
   npm install
   npm run build || exit "$?"
 
   # Checkout SVN repository if not exists
   if [ ! -d "$SVN_PATH" ]; then
-    echo_colorized 2 "No SVN directory found, fetching files..."
+    output 2 "No SVN directory found, fetching files..."
     # Checkout project without any file
     svn co --depth=files "$SVN_REPO" "$SVN_PATH"
 
@@ -228,21 +233,21 @@ if ! $SKIP_SVN; then
   else
     # Update SVN
     cd "$SVN_PATH" || exit
-    echo_colorized 2 "Updating SVN..."
+    output 2 "Updating SVN..."
     svn up
   fi
 
   # Copy GIT directory to trunk
   if ! $SKIP_SVN_TRUNK; then
-    echo_colorized 2 "Copying project files to SVN trunk..."
+    output 2 "Copying project files to SVN trunk..."
     copy_dest_files "trunk" "$GIT_PATH" "$SVN_PATH"
   else
-    echo_colorized 2 "Copying project files to SVN tags/${VERSION}..."
+    output 2 "Copying project files to SVN tags/${VERSION}..."
     copy_dest_files "tags/${VERSION}" "$GIT_PATH" "$SVN_PATH"
 
     # Update stable tag on trunk/readme.txt
     if $UPDATE_STABLE_TAG; then
-      echo_colorized 2 "Updating \"Stable tag\" to ${VERSION} on trunk/readme.txt..."
+      output 2 "Updating \"Stable tag\" to ${VERSION} on trunk/readme.txt..."
       sed -i "6s/.*/Stable tag: ${VERSION}/" trunk/readme.txt
     fi
   fi
@@ -255,18 +260,18 @@ if ! $SKIP_SVN; then
 
   # Copy trunk to tag/$VERSION
   if ! $SKIP_SVN_TRUNK && [ ! -d "tags/${VERSION}" ]; then
-    echo_colorized 2 "Creating SVN tags/${VERSION}..."
+    output 2 "Creating SVN tags/${VERSION}..."
     svn cp trunk tags/"${VERSION}"
   fi
 
   # Remove the GIT directory
-  echo_colorized 2 "Removing GIT directory..."
+  output 2 "Removing GIT directory..."
   rm -rf "$GIT_PATH"
 fi
 
 # Create the GitHub release
 if ! $SKIP_GH; then
-  echo_colorized 2 "Creating GitHub release..."
+  output 2 "Creating GitHub release..."
 
   # Check if is a pre-release.
   if is_substring "-" "${VERSION}"; then
@@ -280,11 +285,12 @@ fi
 
 if ! $SKIP_SVN; then
   # SVN commit messsage
-  echo_colorized 2 "Ready to commit into WordPress.org Plugin's Directory!"
+  output 2 "Ready to commit into WordPress.org Plugin's Directory!"
   echo "Run the follow commads to commit:"
   echo "cd ${SVN_PATH}"
   echo "svn ci -m \"Release ${VERSION}, see readme.txt for changelog.\""
 fi
 
 # Done
-echo_colorized 2 "Release complete!"
+echo
+output 2 "Release complete!"
