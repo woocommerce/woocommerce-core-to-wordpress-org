@@ -1,16 +1,12 @@
 #!/bin/sh
-# WooCommerce releaser script
+# WooCommerce plugin releaser script
 
 # Variables
 RELEASER_VERSION="1.1.0"
 RELEASER_PATH=$(pwd)
 BUILD_PATH="${RELEASER_PATH}/build"
-PRODUCT_NAME="woocommerce"
+PLUGIN_NAME="woocommerce"
 GITHUB_ORG="woocommerce"
-SVN_REPO="http://plugins.svn.wordpress.org/${PRODUCT_NAME}/"
-GIT_REPO="https://github.com/${GITHUB_ORG}/${PRODUCT_NAME}.git"
-SVN_PATH="${BUILD_PATH}/${PRODUCT_NAME}-svn"
-GIT_PATH="${BUILD_PATH}/${PRODUCT_NAME}-git"
 IS_PRE_RELEASE=false
 SKIP_GH=false
 SKIP_SVN=false
@@ -74,7 +70,7 @@ copy_dest_files() {
 }
 
 echo_colorized 5 "-------------------------------------------"
-echo_colorized 5 "           WOOCOMMERCE RELEASER            "
+echo_colorized 5 "        WOOCOMMERCE PLUGIN RELEASER        "
 echo_colorized 5 "-------------------------------------------"
 
 # Set user options
@@ -83,7 +79,7 @@ while [ ! $# -eq 0 ]; do
     -h|--help)
       echo "Usage: ./release.sh [options]"
       echo
-      echo "GitHub to WordPress.org command line client."
+      echo "Plugin from GitHub to WordPress.org command line client."
       echo
       echo "Examples:"
       echo "./release.sh       # Regular release on GitHub and wp.org"
@@ -121,6 +117,14 @@ while [ ! $# -eq 0 ]; do
       rm -rf "$BUILD_PATH"
       echo_colorized 2 "Build directory cleaned!"
       ;;
+    -p|--plugin-name)
+      shift
+      PLUGIN_NAME=$1
+      ;;
+    -o|--github-org)
+      shift
+      GITHUB_ORG=$1
+      ;;
   esac
   shift
 done
@@ -151,16 +155,33 @@ if [ -z "$GITHUB_ACCESS_TOKEN" ]; then
   exit 1
 fi
 
+# Set deploy variables
+SVN_REPO="http://plugins.svn.wordpress.org/${PLUGIN_NAME}/"
+GIT_REPO="https://github.com/${GITHUB_ORG}/${PLUGIN_NAME}.git"
+SVN_PATH="${BUILD_PATH}/${PLUGIN_NAME}-svn"
+GIT_PATH="${BUILD_PATH}/${PLUGIN_NAME}-git"
+
 # Ask info
 echo_colorized 2 "Starting release..."
+echo
 printf "VERSION: "
 read -r VERSION
 printf "BRANCH: "
 read -r BRANCH
+echo
 echo "-------------------------------------------"
-echo "You are about to release \"${VERSION}\" based on \"${BRANCH}\" GIT branch."
+echo
+echo "Review all data before proceed:"
+echo
+echo " • Plugin slug: \"${PLUGIN_NAME}\""
+echo " • Version to release: \"${VERSION}\""
+echo " • GIT branch to release: \"${BRANCH}\""
+echo " • GIT repository: \"${GIT_REPO}\""
+echo " • wp.org repository: \"${SVN_REPO}\""
+echo
 printf "Are you sure? [y/N]: "
 read -r PROCEED
+echo
 
 if [ "$(echo "${PROCEED:-n}" | tr "[:upper:]" "[:lower:]")" != "y" ]; then
   echo_colorized 1 "Release cancelled!"
@@ -254,7 +275,7 @@ if ! $SKIP_GH; then
 
   API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' "$VERSION" "$BRANCH" "$VERSION" "$VERSION" "$IS_PRE_RELEASE")
 
-  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PRODUCT_NAME}/releases?access_token="${GITHUB_ACCESS_TOKEN}"
+  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_NAME}/releases?access_token="${GITHUB_ACCESS_TOKEN}"
 fi
 
 if ! $SKIP_SVN; then
