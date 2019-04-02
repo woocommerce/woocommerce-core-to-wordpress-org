@@ -202,7 +202,7 @@ if ! $SKIP_SVN; then
 
   # Clone GIT repository
   echo_colorized 2 "Cloning GIT repository..."
-  git clone $GIT_REPO "$GIT_PATH" --branch "$BRANCH" --single-branch || exit "$?"
+  git clone "$GIT_REPO" "$GIT_PATH" --branch "$BRANCH" --single-branch || exit "$?"
 
   # Run grunt
   echo_colorized 2 "Running JS Build..."
@@ -214,7 +214,7 @@ if ! $SKIP_SVN; then
   if [ ! -d "$SVN_PATH" ]; then
     echo_colorized 2 "No SVN directory found, fetching files..."
     # Checkout project without any file
-    svn co --depth=files $SVN_REPO "$SVN_PATH"
+    svn co --depth=files "$SVN_REPO" "$SVN_PATH"
 
     cd "$SVN_PATH" || exit
 
@@ -275,7 +275,7 @@ if ! $SKIP_GH; then
 
   API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' "$VERSION" "$BRANCH" "$VERSION" "$VERSION" "$IS_PRE_RELEASE")
 
-  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_SLUG}/releases?access_token="${GITHUB_ACCESS_TOKEN}"
+  curl --data "$API_JSON" "https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_SLUG}/releases?access_token=${GITHUB_ACCESS_TOKEN}"
 fi
 
 if ! $SKIP_SVN; then
