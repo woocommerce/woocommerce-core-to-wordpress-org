@@ -5,7 +5,7 @@
 RELEASER_VERSION="1.1.0"
 RELEASER_PATH=$(pwd)
 BUILD_PATH="${RELEASER_PATH}/build"
-PLUGIN_NAME="woocommerce"
+PLUGIN_SLUG="woocommerce"
 GITHUB_ORG="woocommerce"
 IS_PRE_RELEASE=false
 SKIP_GH=false
@@ -119,7 +119,7 @@ while [ ! $# -eq 0 ]; do
       ;;
     -p|--plugin-name)
       shift
-      PLUGIN_NAME=$1
+      PLUGIN_SLUG=$1
       ;;
     -o|--github-org)
       shift
@@ -156,10 +156,10 @@ if [ -z "$GITHUB_ACCESS_TOKEN" ]; then
 fi
 
 # Set deploy variables
-SVN_REPO="http://plugins.svn.wordpress.org/${PLUGIN_NAME}/"
-GIT_REPO="https://github.com/${GITHUB_ORG}/${PLUGIN_NAME}.git"
-SVN_PATH="${BUILD_PATH}/${PLUGIN_NAME}-svn"
-GIT_PATH="${BUILD_PATH}/${PLUGIN_NAME}-git"
+SVN_REPO="http://plugins.svn.wordpress.org/${PLUGIN_SLUG}/"
+GIT_REPO="https://github.com/${GITHUB_ORG}/${PLUGIN_SLUG}.git"
+SVN_PATH="${BUILD_PATH}/${PLUGIN_SLUG}-svn"
+GIT_PATH="${BUILD_PATH}/${PLUGIN_SLUG}-git"
 
 # Ask info
 echo_colorized 2 "Starting release..."
@@ -173,7 +173,7 @@ echo "-------------------------------------------"
 echo
 echo "Review all data before proceed:"
 echo
-echo " • Plugin slug: \"${PLUGIN_NAME}\""
+echo " • Plugin slug: \"${PLUGIN_SLUG}\""
 echo " • Version to release: \"${VERSION}\""
 echo " • GIT branch to release: \"${BRANCH}\""
 echo " • GIT repository: \"${GIT_REPO}\""
@@ -275,7 +275,7 @@ if ! $SKIP_GH; then
 
   API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' "$VERSION" "$BRANCH" "$VERSION" "$VERSION" "$IS_PRE_RELEASE")
 
-  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_NAME}/releases?access_token="${GITHUB_ACCESS_TOKEN}"
+  curl --data "$API_JSON" https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_SLUG}/releases?access_token="${GITHUB_ACCESS_TOKEN}"
 fi
 
 if ! $SKIP_SVN; then
