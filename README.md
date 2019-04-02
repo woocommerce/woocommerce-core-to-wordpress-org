@@ -23,15 +23,17 @@ For more details about GitHub acess tokens, check ["Creating a personal access t
 
 ## Options
 
-| Options                       | Description                             |
-|-------------------------------|-----------------------------------------|
-| `-h` or `--help`              | Shows help message                      |
-| `-v` or `--version`           | Shows releaser version                  |
-| `-g` or `--skip-gh`           | Skip GitHub release/tag creation        |
-| `-s` or `--skip-svn`          | Skip release on SVN                     |
-| `-t` or `--svn-tag-only`      | Release only a SVN tag                  |
-| `-u` or `--svn-up-stable-tag` | Update "Stable tag" in trunk/readme.txt |
-| `-c` or `--clean`             | Clean build directory                   |
+| Options                       | Description                                     |
+|-------------------------------|-------------------------------------------------|
+| `-h` or `--help`              | Shows help message                              |
+| `-v` or `--version`           | Shows releaser version                          |
+| `-g` or `--skip-gh`           | Skip GitHub release/tag creation                |
+| `-s` or `--skip-svn`          | Skip release on SVN                             |
+| `-t` or `--svn-tag-only`      | Release only a SVN tag                          |
+| `-u` or `--svn-up-stable-tag` | Update "Stable tag" in trunk/readme.txt         |
+| `-c` or `--clean`             | Clean build directory                           |
+| `-p` or `--plugin-slug`       | Plugin's slug (defaults to `woocommerce`)       |
+| `-o` or `--github-org`        | GitHub organization (defaults to `woocommerce`) |
 
 ## Examples
 

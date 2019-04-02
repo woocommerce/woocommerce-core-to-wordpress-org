@@ -100,6 +100,8 @@ while [ ! $# -eq 0 ]; do
       echo "  -t [--svn-tag-only]      Release only a SVN tag"
       echo "  -u [--svn-up-stable-tag] Update \"Stable tag\" in trunk/readme.txt"
       echo "  -c [--clean]             Clean build directory"
+      echo "  -p [--plugin-slug]       Plugin's slug (defaults to \"woocommerce\")"
+      echo "  -o [--github-org]        GitHub organization (defaults to \"woocommerce\")"
       exit 0
       ;;
     -v|--version)
@@ -122,7 +124,7 @@ while [ ! $# -eq 0 ]; do
       rm -rf "$BUILD_PATH"
       output 2 "Build directory cleaned!"
       ;;
-    -p|--plugin-name)
+    -p|--plugin-slug)
       shift
       PLUGIN_SLUG=$1
       ;;
