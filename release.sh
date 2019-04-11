@@ -69,6 +69,7 @@ copy_dest_files() {
     --exclude=phpunit.xml \
     --exclude=phpunit.xml.dist \
     --exclude=README.md \
+    --exclude=renovate.json \
     --exclude=tests/
   output 2 "Done copying files!"
   cd "$3" || exit
