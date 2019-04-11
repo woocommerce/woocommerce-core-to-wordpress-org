@@ -50,7 +50,7 @@ output_list() {
 copy_dest_files() {
   cd "$2" || exit
   echo "Copying progress:"
-  rsync ./ "$3"/"$1"/ --info=progress2 --info=name0 --recursive --delete --delete-excluded \
+  rsync ./ "$3"/"$1"/ --recursive --delete --delete-excluded \
     --exclude=".*/" \
     --exclude="*.md" \
     --exclude=".*" \
