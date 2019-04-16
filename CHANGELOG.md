@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.1] - 2019-04-11
 ### Changed
+- Fixed `--svn-up-stable-tag` on OSX.
+- Replaced `sed` command for Perl's search and replace, since `sed` behaves differently depending on the environment.
+
+## [1.2.1] - 2019-04-11
+### Changed
 - Ignores `renovate.json` file while copying files.
 
 ### Removed
@@ -30,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First stable release.
 
-[Unreleased]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.2.1...HEAD
+[Unreleased]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.2.2...HEAD
+[1.2.2]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.2.1...1.2.2
 [1.2.1]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.2.0...1.2.1
 [1.2.0]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.1.0...1.2.0
 [1.1.0]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.0.0...1.1.0
