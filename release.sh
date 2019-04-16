@@ -251,7 +251,7 @@ if ! $SKIP_SVN; then
     # Update stable tag on trunk/readme.txt
     if $UPDATE_STABLE_TAG; then
       output 2 "Updating \"Stable tag\" to ${VERSION} on trunk/readme.txt..."
-      sed -i "6s/.*/Stable tag: ${VERSION}/" trunk/readme.txt
+      perl -i -pe"s/Stable tag: .*/Stable tag: ${VERSION}/" trunk/readme.txt
     fi
   fi
 
