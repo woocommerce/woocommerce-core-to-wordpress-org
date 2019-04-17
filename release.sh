@@ -198,20 +198,38 @@ fi
 
 output 2 "Confirmed! Starting process..."
 
+# Create build directory if does not exists
+if [ ! -d "$BUILD_PATH" ]; then
+  mkdir -p "$BUILD_PATH"
+fi
+
+# Delete old GIT directory
+rm -rf "$GIT_PATH"
+
+# Clone GIT repository
+output 2 "Cloning GIT repository..."
+git clone "$GIT_REPO" "$GIT_PATH" --branch "$BRANCH" --single-branch || exit "$?"
+
+# Get main file and readme.txt versions
+PLUGIN_VERSION=$(grep -i "Version:" "${GIT_PATH}/${PLUGIN_SLUG}.php" | awk -F' ' '{print $NF}' | tr -d '\r')
+README_VERSION=$(grep -i "Stable tag:" "${GIT_PATH}/readme.txt" | awk -F' ' '{print $NF}' | tr -d '\r')
+
+echo
+output 2 "Scanning plugin files..."
+echo
+
+# Check for versions in the main file and readme.txt
+if [ "${PLUGIN_VERSION}" != "${VERSION}" ]; then
+  output 1 "Version in \"${PLUGIN_SLUG}.php\" is \"${PLUGIN_VERSION}\", but doesn't match with the version provided: \"${VERSION}\"";
+  output 1 "Aborting release..."
+  exit 1;
+elif [ "$README_VERSION" = "trunk" ]; then
+  output 3 "Version in \"readme.txt\" and \"${PLUGIN_SLUG}.php\" don't match, but \"Stable tag\" is trunk."
+  output 3 "Let's continue..."
+fi
+
 # Create SVN release
 if ! $SKIP_SVN; then
-  # Create build directory if does not exists
-  if [ ! -d "$BUILD_PATH" ]; then
-    mkdir -p "$BUILD_PATH"
-  fi
-
-  # Delete old GIT directory
-  rm -rf "$GIT_PATH"
-
-  # Clone GIT repository
-  output 2 "Cloning GIT repository..."
-  git clone "$GIT_REPO" "$GIT_PATH" --branch "$BRANCH" --single-branch || exit "$?"
-
   # Run grunt
   output 2 "Running JS Build..."
   cd "$GIT_PATH" || exit
