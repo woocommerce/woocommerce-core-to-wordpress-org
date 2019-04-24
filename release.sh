@@ -2,7 +2,7 @@
 # WooCommerce plugin releaser script
 
 # Variables
-RELEASER_VERSION="1.3.0"
+RELEASER_VERSION="1.4.0"
 RELEASER_PATH=$(pwd)
 BUILD_PATH="${RELEASER_PATH}/build"
 PLUGIN_SLUG="woocommerce"
@@ -100,7 +100,7 @@ while [ ! $# -eq 0 ]; do
       echo "  -s [--skip-svn]          Skip release on SVN"
       echo "  -t [--svn-tag-only]      Release only a SVN tag"
       echo "  -u [--svn-up-stable-tag] Update \"Stable tag\" in trunk/readme.txt"
-      echo "  -a [--svn-assets]        Update SVN assets"
+      echo "  -a [--svn-assets]        Update SVN assets directory"
       echo "  -c [--clean]             Clean build directory"
       echo "  -p [--plugin-slug]       Plugin's slug (defaults to \"woocommerce\")"
       echo "  -o [--github-org]        GitHub organization (defaults to \"woocommerce\")"
@@ -136,6 +136,10 @@ while [ ! $# -eq 0 ]; do
     -o|--github-org)
       shift
       GITHUB_ORG=$1
+      ;;
+    *)
+      output 1 "\"${1}\" is not a valid command. See \"./release.sh --help\"."
+      exit 1;
       ;;
   esac
   shift
