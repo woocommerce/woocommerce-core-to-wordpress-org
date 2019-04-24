@@ -12,6 +12,7 @@ SKIP_GH=false
 SKIP_SVN=false
 SKIP_SVN_TRUNK=false
 UPDATE_STABLE_TAG=false
+UPDATE_SVN_ASSETS=false
 
 # Functions
 # Check if string contains substring
@@ -49,7 +50,6 @@ output_list() {
 # Sync dest files
 copy_dest_files() {
   cd "$2" || exit
-  echo "Copying progress:"
   rsync ./ "$3"/"$1"/ --recursive --delete --delete-excluded \
     --exclude=".*/" \
     --exclude="*.md" \
@@ -100,6 +100,7 @@ while [ ! $# -eq 0 ]; do
       echo "  -s [--skip-svn]          Skip release on SVN"
       echo "  -t [--svn-tag-only]      Release only a SVN tag"
       echo "  -u [--svn-up-stable-tag] Update \"Stable tag\" in trunk/readme.txt"
+      echo "  -a [--svn-assets]        Update SVN assets"
       echo "  -c [--clean]             Clean build directory"
       echo "  -p [--plugin-slug]       Plugin's slug (defaults to \"woocommerce\")"
       echo "  -o [--github-org]        GitHub organization (defaults to \"woocommerce\")"
@@ -120,6 +121,9 @@ while [ ! $# -eq 0 ]; do
       ;;
     -u|--svn-up-stable-tag)
       UPDATE_STABLE_TAG=true
+      ;;
+    -a|--svn-assets)
+      UPDATE_SVN_ASSETS=true
       ;;
     -c|--clean)
       rm -rf "$BUILD_PATH"
@@ -273,11 +277,21 @@ if ! $SKIP_SVN; then
     fi
   fi
 
+  if $UPDATE_SVN_ASSETS; then
+    output 2 "Copying SVN assets..."
+    copy_dest_files "assets" "${GIT_PATH}/.wordpress-org" "$SVN_PATH" "./.wordpress-org/"
+  fi
+
   # Do the remove all deleted files
   svn st | grep -v "^.[ \t]*\..*" | grep "^\!" | awk '{print $2"@"}' | xargs svn rm
 
   # Do the add all not know files
   svn st | grep -v "^.[ \t]*\..*" | grep "^?" | awk '{print $2"@"}' | xargs svn add
+
+  if $UPDATE_SVN_ASSETS; then
+    svn propset svn:mime-type image/png assets/*.png
+    svn propset svn:mime-type image/jpeg assets/*.jpg
+  fi
 
   # Copy trunk to tag/$VERSION
   if ! $SKIP_SVN_TRUNK && [ ! -d "tags/${VERSION}" ]; then
