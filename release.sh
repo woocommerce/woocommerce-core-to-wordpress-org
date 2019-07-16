@@ -241,6 +241,7 @@ if ! $SKIP_SVN; then
   # Run grunt
   output 2 "Running JS Build..."
   cd "$GIT_PATH" || exit
+  composer install || exit "$?"
   npm install
   npm run build || exit "$?"
 
