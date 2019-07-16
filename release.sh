@@ -2,7 +2,7 @@
 # WooCommerce plugin releaser script
 
 # Variables
-RELEASER_VERSION="1.4.0"
+RELEASER_VERSION="1.4.1"
 RELEASER_PATH=$(pwd)
 BUILD_PATH="${RELEASER_PATH}/build"
 PLUGIN_SLUG="woocommerce"
