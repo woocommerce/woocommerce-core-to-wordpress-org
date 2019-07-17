@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.2] - 2019-07-17
+### Changed
+- Do not exclude vendor folder from copying to svn.
+- Install composer dependencies with --no-dev paramater to only install production packages.
+
+
 ## [1.4.1] - 2019-07-16
 ### Changed
 - Install composer dependencies, and run build before deploy.

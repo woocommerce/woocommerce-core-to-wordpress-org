@@ -2,7 +2,7 @@
 # WooCommerce plugin releaser script
 
 # Variables
-RELEASER_VERSION="1.4.1"
+RELEASER_VERSION="1.4.2"
 RELEASER_PATH=$(pwd)
 BUILD_PATH="${RELEASER_PATH}/build"
 PLUGIN_SLUG="woocommerce"
@@ -56,7 +56,6 @@ copy_dest_files() {
     --exclude=".*" \
     --exclude="composer.*" \
     --exclude="*.lock" \
-    --exclude=/vendor/ \
     --exclude=apigen.neon \
     --exclude=apigen/ \
     --exclude=CHANGELOG.txt \
@@ -238,10 +237,11 @@ fi
 
 # Create SVN release
 if ! $SKIP_SVN; then
+  cd "$GIT_PATH" || exit
+  output 2 "Installing autoload packages..."
+  composer install --no-dev || exit "$?"
   # Run grunt
   output 2 "Running JS Build..."
-  cd "$GIT_PATH" || exit
-  composer install || exit "$?"
   npm install
   npm run build || exit "$?"
 
