@@ -9,6 +9,7 @@ PLUGIN_SLUG="woocommerce"
 GITHUB_ORG="woocommerce"
 IS_PRE_RELEASE=false
 SKIP_GH=false
+SKIP_GH_BUILD=false
 SKIP_SVN=false
 SKIP_SVN_TRUNK=false
 UPDATE_STABLE_TAG=false
@@ -96,6 +97,7 @@ while [ ! $# -eq 0 ]; do
       echo "  -h [--help]              Shows help message"
       echo "  -v [--version]           Shows releaser version"
       echo "  -g [--skip-gh]           Skip GitHub release/tag creation"
+      echo "  -b [--skip-gh-build]     Skip building the release before GitHub release/tag creation"
       echo "  -s [--skip-svn]          Skip release on SVN"
       echo "  -t [--svn-tag-only]      Release only a SVN tag"
       echo "  -u [--svn-up-stable-tag] Update \"Stable tag\" in trunk/readme.txt"
@@ -111,6 +113,9 @@ while [ ! $# -eq 0 ]; do
       ;;
     -g|--skip-gh)
       SKIP_GH=true
+      ;;
+    -b|--skip-gh-build)
+      SKIP_GH_BUILD=true
       ;;
     -s|--skip-svn)
       SKIP_SVN=true
@@ -172,7 +177,7 @@ fi
 
 # Set deploy variables
 SVN_REPO="http://plugins.svn.wordpress.org/${PLUGIN_SLUG}/"
-GIT_REPO="https://github.com/${GITHUB_ORG}/${PLUGIN_SLUG}.git"
+GIT_REPO="git@github.com:${GITHUB_ORG}/${PLUGIN_SLUG}.git"
 SVN_PATH="${BUILD_PATH}/${PLUGIN_SLUG}-svn"
 GIT_PATH="${BUILD_PATH}/${PLUGIN_SLUG}-git"
 
@@ -235,16 +240,45 @@ elif [ "$README_VERSION" = "trunk" ]; then
   output 3 "Let's continue..."
 fi
 
+# Create build from GH
+cd "$GIT_PATH" || exit
+output 2 "Installing autoload packages..."
+# Install composer packages
+composer install --no-dev || exit "$?"
+# Run JS build
+output 2 "Running JS Build..."
+npm install
+npm run build || exit "$?"
+
+# Create GH branch with build and commit before doing a GH release
+if ! $SKIP_GH_BUILD; then
+  CURRENTBRANCH="$(git rev-parse --abbrev-ref HEAD)"
+  # Create a release branch.
+  BUILD_BRANCH="build/${PLUGIN_VERSION}"
+  git checkout -b $BUILD_BRANCH
+
+  # Force vendor directory to be part of release branch
+  git add packages/. --force
+  git add .
+  git commit -m "Adding /packages directory to release" --no-verify
+
+  # Force vendor directory to be part of release branch
+  git add vendor/. --force
+  git add .
+  git commit -m "Adding /vendor directory to release" --no-verify
+
+  # Force assets directory with compiled and minified files to part of release branch
+  git add assets/. --force
+  git add .
+  git commit -m "Adding /assets directory with compiled and minified files to release" --no-verify
+
+  # Push build branch to git
+  git push origin $BUILD_BRANCH
+fi
+
+
 # Create SVN release
 if ! $SKIP_SVN; then
-  cd "$GIT_PATH" || exit
-  output 2 "Installing autoload packages..."
-  composer install --no-dev || exit "$?"
-  # Run grunt
-  output 2 "Running JS Build..."
-  npm install
-  npm run build || exit "$?"
-
   # Checkout SVN repository if not exists
   if [ ! -d "$SVN_PATH" ]; then
     output 2 "No SVN directory found, fetching files..."
@@ -303,10 +337,6 @@ if ! $SKIP_SVN; then
     output 2 "Creating SVN tags/${VERSION}..."
     svn cp trunk tags/"${VERSION}"
   fi
-
-  # Remove the GIT directory
-  output 2 "Removing GIT directory..."
-  rm -rf "$GIT_PATH"
 fi
 
 # Create the GitHub release
@@ -318,9 +348,22 @@ if ! $SKIP_GH; then
     IS_PRE_RELEASE=true
   fi
 
+  # Check if GH build branch needs to be used
+  if ! $SKIP_GH_BUILD; then
+    BRANCH=$BUILD_BRANCH
+  fi
+
   API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' "$VERSION" "$BRANCH" "$VERSION" "$VERSION" "$IS_PRE_RELEASE")
 
   curl --data "$API_JSON" "https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_SLUG}/releases?access_token=${GITHUB_ACCESS_TOKEN}"
+
+  # If GH build branch was used, delete pushed branch after creating release from it.
+  if ! $SKIP_GH_BUILD; then
+    cd "$GIT_PATH" || exit
+    git checkout $CURRENTBRANCH
+    git branch -D $BUILD_BRANCH
+    git push origin --delete $BUILD_BRANCH
+  fi
 fi
 
 if ! $SKIP_SVN; then
