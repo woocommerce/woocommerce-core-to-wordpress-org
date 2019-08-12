@@ -59,6 +59,7 @@ copy_dest_files() {
     --exclude="*.lock" \
     --exclude=apigen.neon \
     --exclude=apigen/ \
+    --exclude=bin/ \
     --exclude=CHANGELOG.txt \
     --exclude=Gruntfile.js \
     --exclude=node_modules/ \
