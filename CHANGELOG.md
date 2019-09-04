@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Do not exclude vendor folder from copying to svn.
 - Install composer dependencies with --no-dev paramater to only install production packages.
 
-
 ## [1.4.1] - 2019-07-16
 ### Changed
 - Install composer dependencies, and run build before deploy.
@@ -60,7 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First stable release.
 
-[Unreleased]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.1...HEAD
+[Unreleased]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.3...HEAD
+[1.4.3]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.2...1.4.3
+[1.4.2]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.1...1.4.2
 [1.4.1]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.0...1.4.1
 [1.4.0]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.3.0...1.4.0
 [1.3.0]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.2.2...1.3.0
