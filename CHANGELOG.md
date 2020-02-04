@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.4] - 2020-02-04
+### Changed
+- Install JS dependencies before PHP dependencies.
+- Fixed coding standards.
+
 ## [1.4.3] - 2019-08-12
 ### Changed
 - Add support for releasing a completed build on Github with all compiled assets and included packages.
@@ -59,7 +64,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - First stable release.
 
-[Unreleased]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.3...HEAD
+[Unreleased]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.4...HEAD
+[1.4.4]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.3...1.4.4
 [1.4.3]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.2...1.4.3
 [1.4.2]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.1...1.4.2
 [1.4.1]: https://github.com/woocommerce/woocommerce-core-to-wordpress-org/compare/1.4.0...1.4.1
