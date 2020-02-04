@@ -243,12 +243,10 @@ fi
 
 # Create build from GH
 cd "$GIT_PATH" || exit
-output 2 "Installing autoload packages..."
-# Install composer packages
-composer install --no-dev || exit "$?"
-# Run JS build
-output 2 "Running JS Build..."
+output 2 "Installing PHP and JS dependencies..."
 npm install
+composer install --no-dev || exit "$?"
+output 2 "Running JS Build..."
 npm run build || exit "$?"
 
 # Create GH branch with build and commit before doing a GH release
@@ -256,7 +254,7 @@ if ! $SKIP_GH_BUILD; then
   CURRENTBRANCH="$(git rev-parse --abbrev-ref HEAD)"
   # Create a release branch.
   BUILD_BRANCH="build/${PLUGIN_VERSION}"
-  git checkout -b $BUILD_BRANCH
+  git checkout -b "$BUILD_BRANCH"
 
   # Force vendor directory to be part of release branch
   git add packages/. --force
@@ -274,7 +272,7 @@ if ! $SKIP_GH_BUILD; then
   git commit -m "Adding /assets directory with compiled and minified files to release" --no-verify
 
   # Push build branch to git
-  git push origin $BUILD_BRANCH
+  git push origin "$BUILD_BRANCH"
 fi
 
 
@@ -361,9 +359,9 @@ if ! $SKIP_GH; then
   # If GH build branch was used, delete pushed branch after creating release from it.
   if ! $SKIP_GH_BUILD; then
     cd "$GIT_PATH" || exit
-    git checkout $CURRENTBRANCH
-    git branch -D $BUILD_BRANCH
-    git push origin --delete $BUILD_BRANCH
+    git checkout "$CURRENTBRANCH"
+    git branch -D "$BUILD_BRANCH"
+    git push origin --delete "$BUILD_BRANCH"
   fi
 fi
 
