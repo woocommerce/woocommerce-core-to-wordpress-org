@@ -52,20 +52,23 @@ output_list() {
 copy_dest_files() {
   cd "$2" || exit
   rsync ./ "$3"/"$1"/ --recursive --delete --delete-excluded \
-    --exclude=".*/" \
-    --exclude="*.md" \
     --exclude=".*" \
-    --exclude="composer.*" \
+    --exclude=".*/" \
     --exclude="*.lock" \
+    --exclude="*.md" \
+    --exclude="composer.*" \
     --exclude=apigen.neon \
     --exclude=apigen/ \
+    --exclude=babel.config.js \
     --exclude=bin/ \
     --exclude=CHANGELOG.txt \
+    --exclude=docker-compose.yaml \
+    --exclude=Dockerfile \
     --exclude=Gruntfile.js \
     --exclude=node_modules/ \
     --exclude=none \
-    --exclude=package.json \
     --exclude=package-lock.json \
+    --exclude=package.json \
     --exclude=phpcs.xml \
     --exclude=phpunit.xml \
     --exclude=phpunit.xml.dist \
