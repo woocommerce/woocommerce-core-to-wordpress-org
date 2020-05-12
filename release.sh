@@ -74,7 +74,8 @@ copy_dest_files() {
     --exclude=phpunit.xml.dist \
     --exclude=README.md \
     --exclude=renovate.json \
-    --exclude=tests/
+    --exclude=tests/ \
+    --exclude=webpack.config.js
   output 2 "Done copying files!"
   cd "$3" || exit
 }
