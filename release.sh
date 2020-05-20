@@ -377,7 +377,7 @@ if ! $SKIP_SVN; then
   output 2 "Ready to commit into WordPress.org Plugin's Directory!"
   echo "Run the follow commads to commit:"
   echo "cd ${SVN_PATH}"
-  echo "svn ci -m \"Release ${VERSION}, see readme.txt for changelog.\""
+  echo "svn ci -m 'Release ${VERSION}, see readme.txt for changelog.'"
 fi
 
 # Done
