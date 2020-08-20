@@ -324,7 +324,7 @@ if ! $SKIP_SVN; then
 
   if $UPDATE_SVN_ASSETS; then
     output 2 "Copying SVN assets..."
-    copy_dest_files "assets" "${GIT_PATH}/.wordpress-org" "$SVN_PATH" "./.wordpress-org/"
+    copy_dest_files "assets" "${GIT_PATH}/.wordpress-org" "$SVN_PATH"
   fi
 
   # Do the remove all deleted files
