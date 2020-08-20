@@ -51,31 +51,7 @@ output_list() {
 # Sync dest files
 copy_dest_files() {
   cd "$2" || exit
-  rsync ./ "$3"/"$1"/ --recursive --delete --delete-excluded \
-    --exclude=".*" \
-    --exclude=".*/" \
-    --exclude="*.lock" \
-    --exclude="*.md" \
-    --exclude="composer.*" \
-    --exclude=apigen.neon \
-    --exclude=apigen/ \
-    --exclude=babel.config.js \
-    --exclude=bin/ \
-    --exclude=CHANGELOG.txt \
-    --exclude=docker-compose.yaml \
-    --exclude=Dockerfile \
-    --exclude=Gruntfile.js \
-    --exclude=node_modules/ \
-    --exclude=none \
-    --exclude=package-lock.json \
-    --exclude=package.json \
-    --exclude=phpcs.xml \
-    --exclude=phpunit.xml \
-    --exclude=phpunit.xml.dist \
-    --exclude=README.md \
-    --exclude=renovate.json \
-    --exclude=tests/ \
-    --exclude=webpack.config.js
+  rsync ./ "$3"/"$1"/ --recursive --delete --delete-excluded --exclude-from=".distignore"
   output 2 "Done copying files!"
   cd "$3" || exit
 }
@@ -324,7 +300,7 @@ if ! $SKIP_SVN; then
 
   if $UPDATE_SVN_ASSETS; then
     output 2 "Copying SVN assets..."
-    copy_dest_files "assets" "${GIT_PATH}/.wordpress-org" "$SVN_PATH" "./.wordpress-org/"
+    copy_dest_files "assets" "${GIT_PATH}/.wordpress-org" "$SVN_PATH"
   fi
 
   # Do the remove all deleted files
