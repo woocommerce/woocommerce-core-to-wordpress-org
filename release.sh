@@ -360,7 +360,7 @@ if ! $SKIP_GH; then
 
   API_JSON=$(printf '{"tag_name": "%s","target_commitish": "%s","name": "%s","body": "Release of version %s","draft": false,"prerelease": %s}' "$VERSION" "$BRANCH" "$VERSION" "$VERSION" "$IS_PRE_RELEASE")
 
-  curl --data "$API_JSON" "https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_SLUG}/releases?access_token=${GITHUB_ACCESS_TOKEN}"
+  curl -H "Authorization: token ${GITHUB_ACCESS_TOKEN}" --data "$API_JSON" "https://api.github.com/repos/${GITHUB_ORG}/${PLUGIN_SLUG}/releases"
 
   # If GH build branch was used, delete pushed branch after creating release from it.
   if ! $SKIP_GH_BUILD; then
