@@ -227,10 +227,9 @@ output 2 "Installing PHP and JS dependencies..."
 npm install
 composer install || exit "$?"
 output 2 "Running JS Build..."
-npm run build || exit "$?"
+npm run build:core || exit "$?"
 output 2 "Cleaning up PHP dependencies..."
 composer install --no-dev || exit "$?"
-
 
 # Create GH branch with build and commit before doing a GH release
 if ! $SKIP_GH_BUILD; then
