@@ -1,5 +1,7 @@
 # WooCommerce Core to WordPress.org
 
+This project is obsolete.
+
 Deploy script used for deploying WooCommerce amongst other things.
 
 ## Install
